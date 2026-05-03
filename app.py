@@ -29,84 +29,292 @@ st.set_page_config(
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── base ── */
-[data-testid="stSidebar"] { background:#0d1117; }
-body, .stApp { background:#060d18; }
+/* ══════════════════════════════════════════════════════════════════
+   INFOSYS CIS CLOUD SHIELD — ENTERPRISE GLASS THEME
+   ══════════════════════════════════════════════════════════════════ */
 
-/* ── login animations ── */
-@keyframes spin-ring  { to { transform:rotate(360deg); } }
-@keyframes glow-pulse {
-    0%,100% { box-shadow:0 0 12px rgba(0,170,255,.45); }
-    50%     { box-shadow:0 0 28px rgba(0,170,255,.9),0 0 48px rgba(124,58,237,.45); }
+/* ── 1. Font ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*, *::before, *::after { font-family:'Inter',system-ui,sans-serif !important; }
+
+/* ── 2. Base / Background ── */
+body, .stApp {
+    background:
+        radial-gradient(ellipse at 15% 20%, rgba(0,102,204,.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(124,58,237,.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, #04091a 0%, #020610 100%) !important;
 }
-@keyframes float-up {
-    0%,100% { transform:translateY(0); }
-    50%     { transform:translateY(-5px); }
+section[data-testid="stMain"] { padding-top:0 !important; }
+.block-container { padding:1.5rem 2rem 3rem !important; max-width:1400px !important; }
+
+/* ── 3. Sidebar ── */
+[data-testid="stSidebar"] {
+    background:rgba(4,9,26,.96) !important;
+    backdrop-filter:blur(24px) !important;
+    -webkit-backdrop-filter:blur(24px) !important;
+    border-right:1px solid rgba(0,170,255,.1) !important;
+}
+[data-testid="stSidebar"] .stMarkdown h2,
+[data-testid="stSidebar"] .stMarkdown h3 {
+    color:#8ba8c4 !important; font-size:10px !important; font-weight:700 !important;
+    letter-spacing:1.8px !important; text-transform:uppercase !important;
+    margin-bottom:6px !important;
+}
+[data-testid="stSidebar"] hr { border-color:rgba(255,255,255,.07) !important; }
+[data-testid="stSidebarContent"] { padding:1.2rem 1rem !important; }
+
+/* ── 4. Tabs ── */
+.stTabs [data-baseweb="tab-list"] {
+    background:rgba(255,255,255,.02) !important;
+    border-bottom:1px solid rgba(255,255,255,.07) !important;
+    gap:4px !important; padding:0 4px !important;
+    border-radius:12px 12px 0 0 !important;
+}
+.stTabs [data-baseweb="tab"] {
+    font-size:13px !important; font-weight:500 !important;
+    color:rgba(255,255,255,.45) !important;
+    padding:10px 22px !important; border-radius:8px 8px 0 0 !important;
+    border-bottom:2px solid transparent !important;
+    background:transparent !important;
+    transition:all .25s ease !important;
+    letter-spacing:.2px !important;
+}
+.stTabs [data-baseweb="tab"]:hover { color:rgba(255,255,255,.75) !important; }
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    color:#00aaff !important; font-weight:600 !important;
+    border-bottom:2px solid #00aaff !important;
+    background:rgba(0,170,255,.06) !important;
+}
+.stTabs [data-baseweb="tab-panel"] {
+    background:rgba(255,255,255,.015) !important;
+    border:1px solid rgba(255,255,255,.06) !important;
+    border-top:none !important; border-radius:0 0 14px 14px !important;
+    padding:24px !important;
 }
 
-/* ── login card: style the centre column block as the card ── */
-div[data-testid="stHorizontalBlock"] > div:nth-child(2) > div > div[data-testid="stVerticalBlock"] {
-    background:linear-gradient(160deg,#0d1b2a 0%,#091220 100%) !important;
-    border:1px solid #1f3a5f !important;
-    border-radius:18px !important;
-    padding:28px 24px 20px !important;
-    box-shadow:0 0 55px rgba(0,170,255,.12) !important;
-    margin-top:7vh !important;
+/* ── 5. Buttons ── */
+.stButton > button {
+    background:linear-gradient(135deg,rgba(0,120,255,.7),rgba(0,70,180,.8)) !important;
+    border:1px solid rgba(0,170,255,.25) !important;
+    border-radius:9px !important; color:#e8f4ff !important;
+    font-size:13px !important; font-weight:600 !important;
+    letter-spacing:.3px !important; padding:10px 18px !important;
+    box-shadow:0 4px 16px rgba(0,100,255,.2),inset 0 1px 0 rgba(255,255,255,.1) !important;
+    transition:all .25s ease !important;
+}
+.stButton > button:hover {
+    background:linear-gradient(135deg,rgba(0,160,255,.8),rgba(0,90,200,.9)) !important;
+    box-shadow:0 6px 24px rgba(0,170,255,.35),inset 0 1px 0 rgba(255,255,255,.15) !important;
+    transform:translateY(-1px) !important; border-color:rgba(0,170,255,.5) !important;
+}
+.stButton > button[kind="primary"] {
+    background:linear-gradient(135deg,#0088ff,#0050cc) !important;
+    box-shadow:0 4px 20px rgba(0,136,255,.35),inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+.stButton > button[kind="primary"]:hover {
+    background:linear-gradient(135deg,#00aaff,#0066dd) !important;
+    box-shadow:0 6px 28px rgba(0,170,255,.5) !important;
 }
 
-/* ── match input fields to card theme ── */
-.stTextInput > div > div > input {
-    background:#070e1c !important;
-    border:1px solid #1f3a5f !important;
-    color:#e0e0e0 !important;
-    border-radius:8px !important;
+/* ── 6. Metric cards ── */
+[data-testid="stMetric"] {
+    background:rgba(255,255,255,.03) !important;
+    backdrop-filter:blur(16px) !important;
+    border:1px solid rgba(255,255,255,.08) !important;
+    border-radius:14px !important; padding:18px 16px !important;
+    box-shadow:0 4px 24px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.05) !important;
+    transition:transform .2s ease, box-shadow .2s ease !important;
+}
+[data-testid="stMetric"]:hover {
+    transform:translateY(-2px) !important;
+    box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 16px rgba(0,170,255,.08) !important;
+}
+[data-testid="stMetricLabel"]  { font-size:11px !important; font-weight:600 !important; letter-spacing:1px !important; text-transform:uppercase !important; color:#6b8aad !important; }
+[data-testid="stMetricValue"]  { font-size:26px !important; font-weight:800 !important; color:#e8f0ff !important; }
+[data-testid="stMetricDelta"]  { font-size:11px !important; font-weight:500 !important; }
+
+/* ── 7. Text inputs & select boxes ── */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea,
+.stNumberInput > div > div > input {
+    background:rgba(255,255,255,.04) !important;
+    border:1px solid rgba(255,255,255,.1) !important;
+    border-radius:9px !important; color:#d0dff0 !important;
+    font-size:13px !important;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.2) !important;
+    transition:border-color .2s, box-shadow .2s !important;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color:rgba(0,170,255,.6) !important;
+    box-shadow:0 0 0 3px rgba(0,170,255,.12),inset 0 2px 4px rgba(0,0,0,.2) !important;
+}
+.stTextInput label, .stTextArea label, .stNumberInput label,
+.stSelectbox label, .stMultiSelect label, .stRadio label,
+.stSlider label { font-size:11px !important; font-weight:600 !important; color:#8098b4 !important; letter-spacing:.8px !important; text-transform:uppercase !important; }
+
+.stSelectbox > div > div, .stMultiSelect > div > div {
+    background:rgba(255,255,255,.04) !important;
+    border:1px solid rgba(255,255,255,.1) !important;
+    border-radius:9px !important; color:#d0dff0 !important;
     font-size:13px !important;
 }
-.stTextInput > div > div > input:focus {
-    border-color:#00aaff !important;
-    box-shadow:0 0 0 2px rgba(0,170,255,.18) !important;
+.stSelectbox > div > div:focus-within, .stMultiSelect > div > div:focus-within {
+    border-color:rgba(0,170,255,.5) !important;
+    box-shadow:0 0 0 3px rgba(0,170,255,.1) !important;
 }
 
-/* ── top header bar ── */
+/* ── 8. DataFrames ── */
+[data-testid="stDataFrame"] {
+    border:1px solid rgba(255,255,255,.07) !important;
+    border-radius:12px !important; overflow:hidden !important;
+    box-shadow:0 4px 24px rgba(0,0,0,.3) !important;
+}
+[data-testid="stDataFrame"] iframe { border-radius:12px !important; }
+
+/* ── 9. Expanders ── */
+[data-testid="stExpander"] {
+    background:rgba(255,255,255,.025) !important;
+    backdrop-filter:blur(12px) !important;
+    border:1px solid rgba(255,255,255,.07) !important;
+    border-radius:12px !important;
+    box-shadow:0 2px 12px rgba(0,0,0,.2) !important;
+    transition:all .2s ease !important;
+}
+[data-testid="stExpander"]:hover { border-color:rgba(0,170,255,.2) !important; }
+[data-testid="stExpanderToggleIcon"] { color:#6b8aad !important; }
+
+/* ── 10. Progress bars ── */
+[data-testid="stProgress"] > div > div > div {
+    background:linear-gradient(90deg,#0066cc,#00aaff,#7c3aed) !important;
+    border-radius:4px !important;
+    box-shadow:0 0 8px rgba(0,170,255,.4) !important;
+}
+[data-testid="stProgress"] > div > div {
+    background:rgba(255,255,255,.06) !important; border-radius:4px !important;
+}
+
+/* ── 11. Alerts / info / success / error ── */
+[data-testid="stAlert"] {
+    border-radius:10px !important;
+    backdrop-filter:blur(8px) !important;
+    font-size:13px !important;
+    border-width:1px !important; border-style:solid !important;
+}
+.stSuccess { background:rgba(0,204,136,.08) !important; border-color:rgba(0,204,136,.25) !important; color:#a0f0d0 !important; }
+.stError   { background:rgba(255,50,80,.08)  !important; border-color:rgba(255,50,80,.25)  !important; color:#ffaaaa !important; }
+.stWarning { background:rgba(255,170,0,.07)  !important; border-color:rgba(255,170,0,.25)  !important; color:#ffd080 !important; }
+.stInfo    { background:rgba(0,136,255,.07)  !important; border-color:rgba(0,136,255,.25)  !important; color:#80c8ff !important; }
+
+/* ── 12. Dividers ── */
+hr {
+    border:none !important;
+    height:1px !important;
+    background:linear-gradient(90deg,transparent,rgba(0,170,255,.2),transparent) !important;
+    margin:20px 0 !important;
+}
+
+/* ── 13. Typography ── */
+h1 { font-size:26px !important; font-weight:800 !important; color:#e8f0ff !important; letter-spacing:-.3px !important; }
+h2 { font-size:18px !important; font-weight:700 !important; color:#ccdaee !important; }
+h3 { font-size:14px !important; font-weight:600 !important; color:#a8bdd4 !important; }
+p, .stMarkdown p { font-size:13.5px !important; color:#8098b4 !important; line-height:1.65 !important; }
+.stCaption, caption { font-size:11px !important; color:#4a6080 !important; }
+
+/* ── 14. Checkboxes / Radio / Slider ── */
+.stCheckbox label { font-size:13px !important; color:#a0b4cc !important; font-weight:400 !important; text-transform:none !important; letter-spacing:0 !important; }
+.stRadio > div { gap:8px !important; }
+.stSlider [data-baseweb="slider"] [role="slider"] { background:#00aaff !important; }
+
+/* ── 15. Topbar ── */
 .topbar {
-    display:flex;align-items:center;gap:16px;
-    padding:12px 24px;
-    background:linear-gradient(90deg,#060d18 0%,#0d1b2a 50%,#060d18 100%);
-    border-bottom:1px solid #1f3a5f;
-    margin-bottom:12px;
+    display:flex; align-items:center; gap:16px;
+    padding:11px 24px;
+    background:rgba(4,9,26,.8);
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid rgba(0,170,255,.12);
+    margin-bottom:16px; position:sticky; top:0; z-index:999;
 }
-.topbar-logo {
-    position:relative;width:40px;height:40px;flex-shrink:0;
-}
+.topbar-logo { position:relative; width:38px; height:38px; flex-shrink:0; }
 .topbar-logo-ring {
-    position:absolute;inset:0;border-radius:50%;
+    position:absolute; inset:0; border-radius:50%;
     background:conic-gradient(from 0deg,#00aaff,#7c3aed,#0044cc,#00ff88,#00aaff);
     animation:spin-ring 4s linear infinite;
 }
 .topbar-logo-inner {
-    position:absolute;inset:2px;border-radius:50%;
-    background:#0d1b2a;
-    display:flex;align-items:center;justify-content:center;font-size:17px;
+    position:absolute; inset:2px; border-radius:50%;
+    background:#04091a;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
 }
-.topbar-name { font-size:20px;font-weight:800;color:#fff; }
-.topbar-tag  { font-size:12px;color:#6b8aad; }
-.topbar-pill {
-    margin-left:auto;background:#0a2a4a;border:1px solid #00aaff33;
-    color:#00aaff;font-size:11px;padding:4px 12px;border-radius:20px;
+.topbar-brand { display:flex; flex-direction:column; gap:1px; }
+.topbar-name  { font-size:16px; font-weight:800; color:#e8f0ff; letter-spacing:-.2px; }
+.topbar-name span { background:linear-gradient(135deg,#00aaff,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.topbar-tag   { font-size:10px; color:#4a6080; font-weight:500; letter-spacing:.8px; text-transform:uppercase; }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.topbar-pill  {
+    background:rgba(0,170,255,.08); border:1px solid rgba(0,170,255,.2);
+    color:#6bbfdf; font-size:11px; font-weight:500; padding:5px 14px;
+    border-radius:20px; letter-spacing:.3px;
+}
+.topbar-dot {
+    width:7px; height:7px; border-radius:50%;
+    background:#00cc88; box-shadow:0 0 6px #00cc88;
+    animation:glow-pulse 2s ease-in-out infinite;
 }
 
-/* ── agent cards ── */
+/* ── 16. Animations ── */
+@keyframes spin-ring  { to { transform:rotate(360deg); } }
+@keyframes glow-pulse {
+    0%,100% { box-shadow:0 0 6px rgba(0,204,136,.6); }
+    50%     { box-shadow:0 0 14px rgba(0,204,136,1); }
+}
+@keyframes float-up   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+/* ── 17. Login card (column-as-card) ── */
+div[data-testid="stHorizontalBlock"] > div:nth-child(2) > div > div[data-testid="stVerticalBlock"] {
+    background:rgba(6,14,32,.85) !important;
+    backdrop-filter:blur(28px) !important;
+    -webkit-backdrop-filter:blur(28px) !important;
+    border:1px solid rgba(0,170,255,.15) !important;
+    border-radius:20px !important;
+    padding:28px 26px 22px !important;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,.04),
+        0 8px 48px rgba(0,0,0,.6),
+        0 0 60px rgba(0,100,255,.07) !important;
+    margin-top:8vh !important;
+}
+
+/* ── 18. Agent pipeline cards ── */
 .agent-card {
-    background:#0d1b2a; border:1px solid #1f3a5f;
-    border-radius:10px; padding:14px 16px; margin-bottom:10px; text-align:center;
+    background:rgba(255,255,255,.03);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:12px; padding:16px 14px;
+    margin-bottom:8px; text-align:center;
+    transition:all .3s ease;
+    box-shadow:0 2px 12px rgba(0,0,0,.25);
 }
-.agent-idle   { border-color:#334; }
-.agent-active { border-color:#00aaff; box-shadow:0 0 14px rgba(0,170,255,0.25); }
-.agent-done   { border-color:#00cc88; }
+.agent-card:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,.35); }
+.agent-idle   { border-color:rgba(255,255,255,.07); }
+.agent-active { border-color:rgba(0,170,255,.5); box-shadow:0 0 20px rgba(0,170,255,.2),0 2px 12px rgba(0,0,0,.25); }
+.agent-done   { border-color:rgba(0,204,136,.4);  box-shadow:0 0 16px rgba(0,204,136,.15); }
 
-/* ── misc ── */
-.kpi-box { background:#111827;border:1px solid #1f2937;border-radius:8px;padding:14px;text-align:center; }
-.snow-row { background:#0f2218;border:1px solid #1a4a2a;border-radius:6px;padding:8px 12px;margin:4px 0; }
+/* ── 19. Misc helpers ── */
+.kpi-box {
+    background:rgba(255,255,255,.03); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,.07); border-radius:12px;
+    padding:16px; text-align:center;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+.snow-row {
+    background:rgba(0,204,136,.04); border:1px solid rgba(0,204,136,.12);
+    border-radius:8px; padding:9px 13px; margin:4px 0; font-size:13px;
+}
+.gradient-text {
+    background:linear-gradient(135deg,#00aaff,#7c3aed);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -170,11 +378,14 @@ st.markdown(f"""
     <div class="topbar-logo-ring"></div>
     <div class="topbar-logo-inner">🛡️</div>
   </div>
-  <div>
-    <div class="topbar-name">Infosys &nbsp;<span style="color:#00aaff">{APP_NAME}</span></div>
+  <div class="topbar-brand">
+    <div class="topbar-name">Infosys &nbsp;<span>{APP_NAME}</span></div>
     <div class="topbar-tag">{APP_TAGLINE}</div>
   </div>
-  <div class="topbar-pill">👤 {st.session_state.get('login_user','admin')}</div>
+  <div class="topbar-right">
+    <div class="topbar-dot" title="Live"></div>
+    <div class="topbar-pill">👤 &nbsp;{st.session_state.get('login_user','admin')}</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
