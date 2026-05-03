@@ -558,10 +558,11 @@ with st.sidebar:
 # ═════════════════════════════════════════════════════════════════════════════
 # TABS
 # ═════════════════════════════════════════════════════════════════════════════
-tab1, tab2, tab3 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "🔐  Credential Intelligence",
     "💾  Backup Intelligence",
     "🔄  Auto-Remediation Loop",
+    "📖  User Guide",
 ])
 
 
@@ -1663,3 +1664,557 @@ Be concise. This goes into ServiceNow. Max 200 words."""
                          column_config={"SNOW Link": st.column_config.LinkColumn("ServiceNow")})
             resolved = sum(1 for r in summary_rows if "✅" in r["Status"])
             st.metric("Incidents Resolved", f"{resolved}/{len(summary_rows)}")
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# TAB 4 — USER GUIDE
+# ═════════════════════════════════════════════════════════════════════════════
+with tab4:
+
+    st.markdown("""
+    <style>
+    /* ── User Guide specific styles ── */
+    .ug-hero {
+        background: linear-gradient(135deg, rgba(0,68,204,.18) 0%, rgba(124,58,237,.12) 100%);
+        border: 1px solid rgba(0,170,255,.2);
+        border-radius: 16px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+    }
+    .ug-hero h1 { font-size:26px !important; font-weight:800 !important;
+                  color:#e8f4ff !important; margin:0 0 6px !important; }
+    .ug-hero p  { color:rgba(255,255,255,.6) !important; font-size:13px !important;
+                  margin:0 !important; }
+
+    .ug-section {
+        background: rgba(255,255,255,.03);
+        border: 1px solid rgba(255,255,255,.07);
+        border-left: 4px solid #00aaff;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+    }
+    .ug-section.purple { border-left-color: #7c3aed; }
+    .ug-section.green  { border-left-color: #00c896; }
+    .ug-section.gold   { border-left-color: #f5a623; }
+    .ug-section.red    { border-left-color: #ff4b6e; }
+
+    .ug-section h3 {
+        font-size:15px !important; font-weight:700 !important;
+        color:#e8f4ff !important; margin:0 0 12px !important;
+        display:flex; align-items:center; gap:8px;
+    }
+    .ug-section p, .ug-section li {
+        font-size:13px !important; color:rgba(255,255,255,.75) !important;
+        line-height:1.7 !important;
+    }
+    .ug-section ul { padding-left:18px !important; margin:8px 0 !important; }
+
+    .ug-step {
+        display:flex; gap:14px; align-items:flex-start;
+        margin-bottom:12px;
+    }
+    .ug-step-num {
+        min-width:28px; height:28px; border-radius:50%;
+        background:linear-gradient(135deg,#0088ff,#0050cc);
+        display:flex; align-items:center; justify-content:center;
+        font-size:12px; font-weight:700; color:#fff;
+        flex-shrink:0; margin-top:1px;
+    }
+    .ug-step-body { font-size:13px !important; color:rgba(255,255,255,.8) !important;
+                    line-height:1.65 !important; }
+    .ug-step-body strong { color:#00aaff !important; }
+
+    .ug-pill {
+        display:inline-block;
+        background:rgba(0,170,255,.12);
+        border:1px solid rgba(0,170,255,.25);
+        border-radius:6px;
+        padding:2px 10px;
+        font-size:12px; font-weight:600; color:#00aaff;
+        margin:0 3px;
+    }
+    .ug-pill.purple { background:rgba(124,58,237,.12); border-color:rgba(124,58,237,.3); color:#a78bfa; }
+    .ug-pill.green  { background:rgba(0,200,150,.1);   border-color:rgba(0,200,150,.25); color:#34d399; }
+    .ug-pill.gold   { background:rgba(245,166,35,.1);  border-color:rgba(245,166,35,.25); color:#f5a623; }
+    .ug-pill.red    { background:rgba(255,75,110,.1);  border-color:rgba(255,75,110,.25); color:#ff6b85; }
+
+    .ug-table { width:100%; border-collapse:collapse; margin:12px 0; font-size:12.5px; }
+    .ug-table th {
+        background:rgba(0,68,204,.25); color:#8ecfff !important;
+        padding:8px 12px; text-align:left; font-weight:600;
+        border-bottom:1px solid rgba(0,170,255,.2);
+    }
+    .ug-table td {
+        padding:8px 12px; color:rgba(255,255,255,.75) !important;
+        border-bottom:1px solid rgba(255,255,255,.05);
+        vertical-align:top;
+    }
+    .ug-table tr:last-child td { border-bottom:none; }
+    .ug-table tr:hover td { background:rgba(255,255,255,.03); }
+
+    .ug-callout {
+        background:rgba(0,200,150,.07);
+        border:1px solid rgba(0,200,150,.2);
+        border-radius:10px;
+        padding:14px 18px;
+        margin:12px 0;
+        font-size:13px;
+        color:rgba(255,255,255,.8) !important;
+    }
+    .ug-callout-warn {
+        background:rgba(245,166,35,.07);
+        border:1px solid rgba(245,166,35,.25);
+        border-radius:10px;
+        padding:14px 18px;
+        margin:12px 0;
+        font-size:13px;
+        color:rgba(255,255,255,.8) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ── Hero ──────────────────────────────────────────────────────────────────
+    st.markdown("""
+    <div class="ug-hero">
+      <h1>📖 Infosys CIS Cloud Shield — User Guide</h1>
+      <p>Complete reference for security operators, cloud engineers, and compliance teams using the platform.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Quick-Start ────────────────────────────────────────────────────────────
+    st.markdown("## ⚡ Quick-Start Checklist")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("""
+        <div class="ug-section">
+          <h3>🛡️ First-Time Setup (5 minutes)</h3>
+          <div class="ug-step"><div class="ug-step-num">1</div>
+            <div class="ug-step-body">Log in with <strong>admin / Infosys@123</strong></div></div>
+          <div class="ug-step"><div class="ug-step-num">2</div>
+            <div class="ug-step-body">In the sidebar → <strong>OpenAI</strong>: paste your API key (sk-...)</div></div>
+          <div class="ug-step"><div class="ug-step-num">3</div>
+            <div class="ug-step-body">In the sidebar → <strong>ServiceNow</strong>: confirm URL/credentials and click <em>Test SNOW Connection</em></div></div>
+          <div class="ug-step"><div class="ug-step-num">4</div>
+            <div class="ug-step-body">In the sidebar → <strong>AWS Account</strong>: select <em>IAM Role (AssumeRole)</em>, paste the Role ARN, click <em>Connect to AWS</em></div></div>
+          <div class="ug-step"><div class="ug-step-num">5</div>
+            <div class="ug-step-body">Open <span class="ug-pill">🔐 Credential Intelligence</span> and click <em>Run AI Agent Analysis</em></div></div>
+        </div>
+        """, unsafe_allow_html=True)
+    with c2:
+        st.markdown("""
+        <div class="ug-section green">
+          <h3>✅ Platform Credentials</h3>
+          <table class="ug-table">
+            <tr><th>What</th><th>Value</th></tr>
+            <tr><td>App Username</td><td><strong>admin</strong></td></tr>
+            <tr><td>App Password</td><td><strong>Infosys@123</strong></td></tr>
+            <tr><td>ServiceNow URL</td><td>dev218436.service-now.com</td></tr>
+            <tr><td>ServiceNow User</td><td>admin</td></tr>
+            <tr><td>AWS Role ARN</td><td>arn:aws:iam::448549863273:role/CISCloudShieldRole</td></tr>
+            <tr><td>AWS Account</td><td>448549863273</td></tr>
+          </table>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 1: Login ───────────────────────────────────────────────────────
+    st.markdown("## 1 · Login")
+    st.markdown("""
+    <div class="ug-section">
+      <h3>🔑 Accessing the Platform</h3>
+      <p>The platform presents a login gate on first load. Enter the credentials below and click <strong>Sign In</strong>.</p>
+      <table class="ug-table">
+        <tr><th>Field</th><th>Value</th><th>Notes</th></tr>
+        <tr><td>Username</td><td><code>admin</code></td><td>Default administrator account</td></tr>
+        <tr><td>Password</td><td><code>Infosys@123</code></td><td>Change in app.py for production deployments</td></tr>
+      </table>
+      <p>Once authenticated your session persists until the browser tab is closed or you log out via the sidebar.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 2: Sidebar ─────────────────────────────────────────────────────
+    st.markdown("## 2 · Sidebar Configuration")
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown("""
+        <div class="ug-section purple">
+          <h3>🤖 OpenAI / AI Model</h3>
+          <p><strong>API Key:</strong> Paste your OpenAI key starting with <code>sk-...</code>.<br>
+          On Streamlit Cloud the key is pre-loaded from <code>.streamlit/secrets.toml</code> — no input needed.</p>
+          <p><strong>Model selector:</strong></p>
+          <ul>
+            <li><code>gpt-4o</code> — Best quality, recommended for production demos</li>
+            <li><code>gpt-4o-mini</code> — Faster and cheaper for development testing</li>
+            <li><code>gpt-4-turbo</code> — Alternative if gpt-4o quota is exhausted</li>
+          </ul>
+          <div class="ug-callout">The AI agents (Scanner, Risk, Remediator, Prevention) all use whichever model is selected here.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="ug-section green">
+          <h3>🎫 ServiceNow Connection</h3>
+          <ul>
+            <li><strong>Instance URL:</strong> <code>https://dev218436.service-now.com</code></li>
+            <li><strong>Username:</strong> <code>admin</code></li>
+            <li><strong>Password:</strong> Pre-filled from secrets</li>
+          </ul>
+          <p>Click <em>Test SNOW Connection</em> to verify. A green success banner confirms the API is reachable. ServiceNow is used to create incidents (INC), change requests (CHG), and close tickets during auto-remediation.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_b:
+        st.markdown("""
+        <div class="ug-section gold">
+          <h3>☁️ AWS Account — IAM Role Auth</h3>
+          <p>The platform uses <strong>IAM Role (AssumeRole)</strong> — no long-lived access keys are stored anywhere.</p>
+
+          <div class="ug-step"><div class="ug-step-num">1</div>
+            <div class="ug-step-body">Select <strong>IAM Role (AssumeRole)</strong> as Auth Method</div></div>
+          <div class="ug-step"><div class="ug-step-num">2</div>
+            <div class="ug-step-body">Paste the Role ARN:<br><code>arn:aws:iam::448549863273:role/CISCloudShieldRole</code></div></div>
+          <div class="ug-step"><div class="ug-step-num">3</div>
+            <div class="ug-step-body">Leave <strong>External ID</strong> blank (same-account trust)</div></div>
+          <div class="ug-step"><div class="ug-step-num">4</div>
+            <div class="ug-step-body">Select your <strong>Region</strong> (default: us-east-1)</div></div>
+          <div class="ug-step"><div class="ug-step-num">5</div>
+            <div class="ug-step-body">Click <strong>Connect to AWS</strong> — a green banner shows Account ID and ARN on success</div></div>
+
+          <div class="ug-callout-warn">⚠️ <strong>Environment / Instance Profile</strong> only works when the app runs on EC2, ECS, or Lambda. It will fail on Streamlit Cloud — always use IAM Role on the cloud deployment.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 3: Tab 1 — Credential Intelligence ────────────────────────────
+    st.markdown("## 3 · Tab 1 — Credential Intelligence")
+
+    st.markdown("""
+    <div class="ug-section">
+      <h3>🔐 Purpose</h3>
+      <p>Detect, score, and remediate <strong>~1,200 hardcoded credentials</strong> across AWS-hosted applications
+      using a 4-agent AI pipeline. Produces prioritised findings, AI risk analysis, remediation plans, and
+      prevention guidance. Can also raise ServiceNow change requests for critical findings.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    cred_c1, cred_c2 = st.columns(2)
+    with cred_c1:
+        st.markdown("""
+        <div class="ug-section">
+          <h3>📊 Metrics & Findings Table</h3>
+          <p>The top of the tab shows four KPI cards:</p>
+          <ul>
+            <li><span class="ug-pill red">CRITICAL</span> count — requires immediate action</li>
+            <li><span class="ug-pill gold">HIGH</span> count — remediate within 24 hours</li>
+            <li><span class="ug-pill purple">MEDIUM</span> count — remediate within 7 days</li>
+            <li>Total findings across all 1,200+ detections</li>
+          </ul>
+          <p>Use the <strong>filters</strong> (Severity, Environment, Credential Type, Status, Search) to narrow the findings table. The table is sortable and shows application, file location, age, and current status.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="ug-section purple">
+          <h3>🤖 Run AI Agent Analysis</h3>
+          <p>Click <strong>Run AI Agent Analysis</strong> to launch the 4-agent pipeline:</p>
+          <ul>
+            <li><span class="ug-pill">Scanner Agent</span> — catalogues all findings by type and severity</li>
+            <li><span class="ug-pill purple">Risk Agent</span> — scores blast radius, compliance impact, and priority</li>
+            <li><span class="ug-pill green">Remediator Agent</span> — produces step-by-step remediation plan</li>
+            <li><span class="ug-pill gold">Prevention Agent</span> — recommends controls to prevent re-occurrence</li>
+          </ul>
+          <p>Each agent streams output in real time. You can see the thinking as it happens — no need to wait for completion before reading early results.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with cred_c2:
+        st.markdown("""
+        <div class="ug-section green">
+          <h3>🎫 Create SNOW Change Requests</h3>
+          <p>After reviewing findings, scroll to <strong>Raise Change Requests for Credential Remediation</strong>:</p>
+          <div class="ug-step"><div class="ug-step-num">1</div>
+            <div class="ug-step-body">Use the slider to set <strong>Max Change Requests to Create</strong> (1–10)</div></div>
+          <div class="ug-step"><div class="ug-step-num">2</div>
+            <div class="ug-step-body">Click <strong>Create SNOW Change Requests (Critical Findings)</strong></div></div>
+          <div class="ug-step"><div class="ug-step-num">3</div>
+            <div class="ug-step-body">The platform creates a CHG record in ServiceNow for each CRITICAL finding, with full finding detail in the description</div></div>
+          <div class="ug-step"><div class="ug-step-num">4</div>
+            <div class="ug-step-body">Click the ServiceNow links in the results table to open tickets directly</div></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="ug-section gold">
+          <h3>🔎 Live AWS IAM Scan</h3>
+          <p>Connect to AWS first (sidebar), then click <strong>Run Live IAM Scan</strong> to query your real AWS account:</p>
+          <ul>
+            <li>IAM Credential Report — root keys, MFA status, stale passwords</li>
+            <li>Access keys older than 90/180 days flagged as HIGH/CRITICAL</li>
+            <li>Console users without MFA</li>
+            <li>Secrets Manager inventory and rotation status</li>
+            <li>Security Hub active failed controls</li>
+          </ul>
+          <p>Live findings replace mock data in the table and are available as input to the Auto-Remediation Loop.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 4: Tab 2 — Backup Intelligence ────────────────────────────────
+    st.markdown("## 4 · Tab 2 — Backup Intelligence")
+
+    st.markdown("""
+    <div class="ug-section purple">
+      <h3>💾 Purpose</h3>
+      <p>Assess immutable backup coverage across <strong>~250 applications</strong>. Identify unprotected and
+      partially-protected resources, explore supported backup technologies, and raise ServiceNow incidents
+      for applications with no backup in place.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    bk_c1, bk_c2 = st.columns(2)
+    with bk_c1:
+        st.markdown("""
+        <div class="ug-section">
+          <h3>📈 Coverage Dashboard</h3>
+          <p>The tab opens with three KPI tiles:</p>
+          <ul>
+            <li><span class="ug-pill green">Protected</span> — immutable backup confirmed</li>
+            <li><span class="ug-pill gold">Partial</span> — some backup but not fully immutable</li>
+            <li><span class="ug-pill red">Unprotected</span> — no backup at all</li>
+          </ul>
+          <p>A donut chart shows the coverage split. Filter the inventory table by <strong>Status, Environment, Criticality,</strong> and <strong>Type</strong> to focus on priority applications.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="ug-section green">
+          <h3>☁️ Live AWS Backup Scan</h3>
+          <p>With AWS connected, click <strong>Scan AWS Backup Coverage</strong>:</p>
+          <ul>
+            <li><strong>EC2</strong> — checks AWS Backup protected resources</li>
+            <li><strong>RDS</strong> — automated backup period + Backup vault coverage</li>
+            <li><strong>S3</strong> — Object Lock configuration + versioning status</li>
+            <li><strong>DynamoDB</strong> — Point-in-Time Recovery (PITR) status</li>
+          </ul>
+          <p>Results replace mock data and show your real account's backup posture.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with bk_c2:
+        st.markdown("""
+        <div class="ug-section gold">
+          <h3>🏗️ Backup Technologies Explorer</h3>
+          <p>The <strong>Backup Technologies</strong> section has four sub-tabs:</p>
+          <table class="ug-table">
+            <tr><th>Technology</th><th>Best For</th><th>Immutability</th></tr>
+            <tr><td>AWS Backup</td><td>All native AWS resources</td><td>Vault Lock (WORM)</td></tr>
+            <tr><td>Veeam v12</td><td>VMware, Hyper-V, hybrid</td><td>Hardened Linux Repo</td></tr>
+            <tr><td>Commvault</td><td>Enterprise / SAP / Oracle</td><td>Air-Gap Protect</td></tr>
+            <tr><td>S3 Object Lock</td><td>Object-level WORM</td><td>Compliance Mode</td></tr>
+          </table>
+          <p>Each sub-tab shows RPO/RTO, supported platforms, and key features.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+        <div class="ug-section red">
+          <h3>🚨 Create SNOW Incidents</h3>
+          <p>For applications with no backup, click <strong>Create SNOW Incidents for Unprotected Apps</strong>:</p>
+          <ul>
+            <li>Slider controls how many incidents to raise (1–10)</li>
+            <li>Highest-criticality unprotected apps are prioritised</li>
+            <li>Each incident includes application name, type, environment, and recommended backup solution</li>
+            <li>Links to created tickets appear in the results table</li>
+          </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 5: Tab 3 — Auto-Remediation Loop ──────────────────────────────
+    st.markdown("## 5 · Tab 3 — Auto-Remediation Loop")
+
+    st.markdown("""
+    <div class="ug-section red">
+      <h3>🔄 How the Loop Works</h3>
+      <p>The Auto-Remediation Loop is a <strong>closed-loop, 4-phase agentic pipeline</strong> that processes
+      security findings end-to-end — from incident creation to ServiceNow ticket closure — without manual steps.</p>
+      <table class="ug-table">
+        <tr><th>Phase</th><th>Agent</th><th>Action</th><th>ServiceNow</th></tr>
+        <tr><td>1</td><td><span class="ug-pill red">INC Agent</span></td><td>Creates incident, classifies severity, enriches with blast-radius context</td><td>INC created</td></tr>
+        <tr><td>2</td><td><span class="ug-pill gold">Dispatcher Agent</span></td><td>Investigates root cause, determines remediation playbook</td><td>INC updated</td></tr>
+        <tr><td>3</td><td><span class="ug-pill green">Remediator Agent</span></td><td>Executes fix, validates result, produces resolution note</td><td>CHG created &amp; resolved</td></tr>
+        <tr><td>4</td><td><span class="ug-pill red">INC Agent</span></td><td>Receives resolution, writes closure note, closes the incident</td><td>INC closed ✅</td></tr>
+      </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+    loop_c1, loop_c2 = st.columns(2)
+    with loop_c1:
+        st.markdown("""
+        <div class="ug-section">
+          <h3>⚙️ Configuration Options</h3>
+          <ul>
+            <li><strong>Finding source</strong> — <em>Mock data (demo)</em> uses the 1,200 synthetic findings.
+            <em>Live IAM scan</em> uses findings from the Tab 1 live scan (requires AWS connection).</li>
+            <li><strong>Findings to process</strong> — Number of findings to run through the loop (1–20).
+            Start with 1–3 for a demo.</li>
+            <li><strong>Target severity</strong> — Filter to CRITICAL, HIGH, and/or MEDIUM findings only.</li>
+          </ul>
+          <div class="ug-callout">Each finding runs all 4 agent phases before moving to the next. Progress bar tracks overall completion.</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with loop_c2:
+        st.markdown("""
+        <div class="ug-section purple">
+          <h3>▶️ Running the Loop</h3>
+          <div class="ug-step"><div class="ug-step-num">1</div>
+            <div class="ug-step-body">Ensure ServiceNow and OpenAI are configured in the sidebar</div></div>
+          <div class="ug-step"><div class="ug-step-num">2</div>
+            <div class="ug-step-body">Set <strong>Finding source, count,</strong> and <strong>severity filter</strong></div></div>
+          <div class="ug-step"><div class="ug-step-num">3</div>
+            <div class="ug-step-body">Click <strong>▶ Start Remediation Loop</strong></div></div>
+          <div class="ug-step"><div class="ug-step-num">4</div>
+            <div class="ug-step-body">Watch each agent stream its output inside the finding expander panel</div></div>
+          <div class="ug-step"><div class="ug-step-num">5</div>
+            <div class="ug-step-body">When complete, a <strong>Summary Table</strong> shows INC numbers, SNOW links, and resolution status for all processed findings</div></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 6: IAM Role Reference ─────────────────────────────────────────
+    st.markdown("## 6 · IAM Role Reference")
+
+    st.markdown("""
+    <div class="ug-section green">
+      <h3>🔐 CISCloudShieldRole — Pre-Provisioned in Account 448549863273</h3>
+      <table class="ug-table">
+        <tr><th>Attribute</th><th>Value</th></tr>
+        <tr><td>Role Name</td><td><code>CISCloudShieldRole</code></td></tr>
+        <tr><td>Role ARN</td><td><code>arn:aws:iam::448549863273:role/CISCloudShieldRole</code></td></tr>
+        <tr><td>Inline Policy</td><td><code>CISCloudShieldScanPolicy</code> (read-only)</td></tr>
+        <tr><td>Trusted Principal</td><td><code>arn:aws:iam::448549863273:user/Ajit_Gosavi@infosys.com</code></td></tr>
+        <tr><td>Session Duration</td><td>3,600 seconds — temporary credentials auto-expire after 1 hour</td></tr>
+        <tr><td>Permissions</td><td>IAM credential report, Secrets Manager list, Security Hub findings, AWS Backup, EC2/RDS/S3/DynamoDB describe, CloudTrail, CloudWatch</td></tr>
+      </table>
+      <div class="ug-callout">No access keys are ever issued. The platform calls <code>sts:AssumeRole</code> and receives short-lived credentials automatically. All calls are logged in CloudTrail.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 7: Troubleshooting ─────────────────────────────────────────────
+    st.markdown("## 7 · Troubleshooting")
+
+    st.markdown("""
+    <div class="ug-section red">
+      <h3>🔧 Common Issues & Fixes</h3>
+      <table class="ug-table">
+        <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+        <tr>
+          <td><em>Connection failed: No AWS credentials configured</em></td>
+          <td>Environment / Instance Profile selected but app is running on Streamlit Cloud (no instance role)</td>
+          <td>Switch Auth Method to <strong>IAM Role (AssumeRole)</strong> and paste the Role ARN</td>
+        </tr>
+        <tr>
+          <td><em>Connection failed: AccessDenied</em></td>
+          <td>The IAM user/role making the call is not listed in CISCloudShieldRole's trust policy</td>
+          <td>Add your principal to the role's trust policy in AWS IAM console</td>
+        </tr>
+        <tr>
+          <td>AI agents produce no output</td>
+          <td>OpenAI API key missing or invalid</td>
+          <td>Paste a valid <code>sk-...</code> key in the sidebar OpenAI section</td>
+        </tr>
+        <tr>
+          <td>SNOW connection fails</td>
+          <td>ServiceNow developer instance may be sleeping (free instances sleep after inactivity)</td>
+          <td>Log in to <code>dev218436.service-now.com</code> directly to wake the instance, then retry</td>
+        </tr>
+        <tr>
+          <td>Live Backup Scan returns no results</td>
+          <td>AWS account has no EC2/RDS/DynamoDB resources, or role lacks describe permissions</td>
+          <td>Verify resources exist in the selected region; check CISCloudShieldScanPolicy is attached</td>
+        </tr>
+        <tr>
+          <td>Topbar text clipped</td>
+          <td>Browser zoom level above 100%</td>
+          <td>Set browser zoom to 100% (Ctrl+0)</td>
+        </tr>
+      </table>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.divider()
+
+    # ── Section 8: FAQ ─────────────────────────────────────────────────────────
+    st.markdown("## 8 · Frequently Asked Questions")
+
+    with st.expander("Is the mock data realistic?"):
+        st.markdown(
+            "Yes. The mock dataset is deterministically generated (random seed 42) to simulate a real enterprise "
+            "environment: 1,200 credential findings distributed across 435 CRITICAL, 491 HIGH, and 274 MEDIUM "
+            "findings, spread across development, staging, and production environments with realistic application "
+            "names, credential types, and file locations."
+        )
+    with st.expander("Can I use this against my own AWS account?"):
+        st.markdown(
+            "Yes. Connect using the IAM Role (AssumeRole) method. The CISCloudShieldRole is pre-provisioned in "
+            "account 448549863273. To use it against a different account, create a role in that account with the "
+            "same trust policy and permissions policy (both available in the GitHub repo as "
+            "`cis-trust-policy.json` and `cis-permissions-policy.json`)."
+        )
+    with st.expander("Will the Auto-Remediation Loop create real ServiceNow tickets?"):
+        st.markdown(
+            "Yes — if ServiceNow credentials are configured and the connection test passes, the loop creates "
+            "real INC and CHG records in the connected ServiceNow instance. The tickets include full finding "
+            "context, agent analysis, and are automatically closed by the INC Agent at the end of each loop iteration."
+        )
+    with st.expander("Which AI model is used?"):
+        st.markdown(
+            "The sidebar defaults to **gpt-4o** (OpenAI). The platform architecture is designed to support "
+            "Anthropic Claude Opus 4.7 (`claude-opus-4-7`) — Anthropic's most capable model — as the preferred "
+            "enterprise AI backbone. Switch to the Claude API endpoint by updating the `openai.OpenAI(base_url=...)` "
+            "call in app.py to point to the Anthropic API."
+        )
+    with st.expander("How are temporary AWS credentials handled?"):
+        st.markdown(
+            "When you click **Connect to AWS** with IAM Role selected, the platform calls `sts:AssumeRole` "
+            "and receives temporary credentials valid for 1 hour (AccessKeyId, SecretAccessKey, SessionToken). "
+            "These are stored only in the Streamlit session state for the duration of your browser session — "
+            "they are never written to disk, logged, or transmitted outside the app. They expire automatically "
+            "after 1 hour with no revocation step needed."
+        )
+    with st.expander("How do I deploy this on Streamlit Cloud?"):
+        st.markdown(
+            "1. Fork the GitHub repo: `https://github.com/ajittgosavii/awssec`\n"
+            "2. Connect it to your Streamlit Cloud account\n"
+            "3. Add secrets in the Streamlit Cloud dashboard under **Settings → Secrets**:\n"
+            "```toml\n"
+            "OPENAI_API_KEY = \"sk-...\"\n"
+            "SNOW_URL       = \"https://dev218436.service-now.com\"\n"
+            "SNOW_USER      = \"admin\"\n"
+            "SNOW_PASS      = \"your-snow-password\"\n"
+            "AWS_ROLE_ARN   = \"arn:aws:iam::448549863273:role/CISCloudShieldRole\"\n"
+            "```\n"
+            "4. Deploy — the app will auto-load all credentials from secrets with no sidebar input required."
+        )
+
+    st.divider()
+
+    # ── Footer ─────────────────────────────────────────────────────────────────
+    st.markdown("""
+    <div style="text-align:center;padding:20px 0;color:rgba(255,255,255,.3);font-size:12px;">
+      Infosys CIS Cloud Shield &nbsp;|&nbsp; Agentic AI · AWS Security · Immutable Backup
+      &nbsp;|&nbsp; Powered by Anthropic Claude Opus 4.7
+    </div>
+    """, unsafe_allow_html=True)
