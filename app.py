@@ -472,13 +472,12 @@ with st.sidebar:
         "ap-southeast-1","ap-southeast-2","ap-northeast-1",
     ]
 
-    # Auth method toggle
+    # Auth method — IAM Role is always the default (works everywhere including Streamlit Cloud)
     _auth_labels = ["🔐 IAM Role (AssumeRole)", "🖥️ Environment / Instance Profile"]
-    _auth_idx    = 1 if not _aws_role_default else 0
     _auth_choice = st.radio(
-        "Auth Method", _auth_labels, index=_auth_idx,
-        help="Enterprise standard: supply a Role ARN — no long-lived keys needed. "
-             "On EC2/ECS/Lambda: choose Environment to use the attached instance/task role automatically.",
+        "Auth Method", _auth_labels, index=0,
+        help="IAM Role: paste a Role ARN — works on Streamlit Cloud, local, CI/CD, anywhere.\n"
+             "Environment: only works when this app runs on AWS infrastructure (EC2, ECS, Lambda).",
     )
     _use_role = (_auth_choice == _auth_labels[0])
 
@@ -487,27 +486,20 @@ with st.sidebar:
             st.success("Role ARN loaded from secrets ✓")
         aws_role_arn = st.text_input(
             "Role ARN", value=_aws_role_default,
-            placeholder="arn:aws:iam::123456789012:role/CISCloudShieldRole",
+            placeholder="arn:aws:iam::448549863273:role/CISCloudShieldRole",
         )
         aws_ext_id = st.text_input(
             "External ID  *(optional)*", value=_aws_ext_id_default,
             placeholder="CISCloudShield-ExternalId",
         )
-        st.caption("Add this trust policy to the target role:")
-        st.code(
-            '{\n  "Effect":"Allow",\n  "Principal":{"AWS":"<deployer-ARN>"},\n'
-            '  "Action":"sts:AssumeRole"\n}',
-            language="json",
-        )
     else:
         aws_role_arn = ""
         aws_ext_id   = ""
-        st.info(
-            "Credentials will be sourced automatically from:\n"
-            "- EC2 Instance Profile\n"
-            "- ECS Task Role\n"
-            "- Lambda Execution Role\n"
-            "- AWS SSO / environment variables"
+        st.warning(
+            "**Only works on AWS infrastructure.**\n\n"
+            "This mode requires the app to run on EC2, ECS Fargate, or Lambda "
+            "with an attached instance/task role. It will fail on Streamlit Cloud.\n\n"
+            "Use **IAM Role (AssumeRole)** instead."
         )
 
     aws_region = st.selectbox(
@@ -517,7 +509,7 @@ with st.sidebar:
 
     if st.button("🔌 Connect to AWS", use_container_width=True):
         if _use_role and not aws_role_arn:
-            st.warning("Enter a Role ARN to use AssumeRole authentication.")
+            st.warning("Enter a Role ARN — e.g. arn:aws:iam::448549863273:role/CISCloudShieldRole")
         else:
             st.session_state.aws_creds = {
                 "role_arn":    aws_role_arn,
@@ -535,8 +527,16 @@ with st.sidebar:
                 st.success(f"✅ Connected\n**Account:** {result['account_id']}")
                 st.caption(result["arn"])
             else:
+                _err = result["error"]
+                if "No AWS credentials" in _err or "NoCredentialError" in _err or "Unable to locate" in _err:
+                    st.error(
+                        "No credentials found.\n\n"
+                        "Switch to **IAM Role (AssumeRole)** and paste:\n"
+                        "`arn:aws:iam::448549863273:role/CISCloudShieldRole`"
+                    )
+                else:
+                    st.error(f"Connection failed: {_err}")
                 st.session_state.aws_connected = False
-                st.error(f"Connection failed: {result['error']}")
 
     if st.session_state.aws_connected:
         st.success(f"🟢 Live — Account {st.session_state.get('aws_account_id','')}")
