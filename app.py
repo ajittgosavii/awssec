@@ -44,8 +44,17 @@ body, .stApp {
         radial-gradient(ellipse at 85% 80%, rgba(124,58,237,.05) 0%, transparent 55%),
         radial-gradient(ellipse at 50% 50%, #04091a 0%, #020610 100%) !important;
 }
-section[data-testid="stMain"] { padding-top:0 !important; }
-.block-container { padding:1.5rem 2rem 3rem !important; max-width:1400px !important; }
+
+/* Hide Streamlit's native top bar so our custom topbar has full room */
+header[data-testid="stHeader"]          { display:none !important; }
+#MainMenu                               { display:none !important; }
+[data-testid="stToolbar"]              { display:none !important; }
+[data-testid="stDecoration"]           { display:none !important; }
+footer                                  { display:none !important; }
+
+/* Remove the top gap Streamlit adds for the hidden header */
+section[data-testid="stMain"]          { padding-top:0 !important; margin-top:0 !important; }
+.block-container                        { padding:0 2rem 3rem !important; max-width:1400px !important; }
 
 /* ── 3. Sidebar ── */
 [data-testid="stSidebar"] {
