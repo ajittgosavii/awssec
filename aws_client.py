@@ -29,17 +29,39 @@ def _age_days(value) -> int:
 
 class AWSIntelligenceClient:
 
-    def __init__(self, access_key: str = "", secret_key: str = "",
-                 region: str = "us-east-1", session_token: str = ""):
+    def __init__(self, role_arn: str = "", external_id: str = "",
+                 region: str = "us-east-1", auth_method: str = "env"):
+        """
+        auth_method="role"  → STS AssumeRole using role_arn (+ optional external_id)
+        auth_method="env"   → boto3 credential chain: env vars, instance profile,
+                              ECS task role, SSO — nothing entered in the UI
+        """
         self.region = region
         self.account_id: str = ""
-        kwargs: dict = {"region_name": region}
-        if access_key and secret_key:
-            kwargs["aws_access_key_id"]     = access_key
-            kwargs["aws_secret_access_key"] = secret_key
-            if session_token:
-                kwargs["aws_session_token"] = session_token
-        self._session = boto3.Session(**kwargs)
+
+        if auth_method == "role" and role_arn:
+            # Assume the IAM role; the caller identity of the host/env is used
+            # to make the sts:AssumeRole call, so no long-lived keys are needed.
+            sts_client = boto3.client("sts", region_name=region)
+            assume_kwargs: dict = {
+                "RoleArn":         role_arn,
+                "RoleSessionName": "CISCloudShieldSession",
+                "DurationSeconds": 3600,
+            }
+            if external_id:
+                assume_kwargs["ExternalId"] = external_id
+            resp  = sts_client.assume_role(**assume_kwargs)
+            creds = resp["Credentials"]
+            self._session = boto3.Session(
+                aws_access_key_id     = creds["AccessKeyId"],
+                aws_secret_access_key = creds["SecretAccessKey"],
+                aws_session_token     = creds["SessionToken"],
+                region_name           = region,
+            )
+        else:
+            # Let boto3 discover credentials automatically:
+            # env vars → ~/.aws/credentials → instance profile → ECS task role → SSO
+            self._session = boto3.Session(region_name=region)
 
     def _client(self, service: str):
         return self._session.client(service, region_name=self.region)

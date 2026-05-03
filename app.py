@@ -423,18 +423,17 @@ _oai_from_secrets   = _secrets.get("OPENAI_API_KEY",  "")
 _snow_url_default   = _secrets.get("SNOW_URL",         "https://dev218436.service-now.com")
 _snow_user_default  = _secrets.get("SNOW_USER",        "admin")
 _snow_pass_default  = _secrets.get("SNOW_PASS",        "")
-_aws_key_default    = _secrets.get("AWS_ACCESS_KEY_ID",     "")
-_aws_secret_default = _secrets.get("AWS_SECRET_ACCESS_KEY", "")
-_aws_token_default  = _secrets.get("AWS_SESSION_TOKEN",     "")
-_aws_region_default = _secrets.get("AWS_DEFAULT_REGION",    "us-east-1")
+_aws_role_default   = _secrets.get("AWS_ROLE_ARN",       "")
+_aws_ext_id_default = _secrets.get("AWS_EXTERNAL_ID",    "")
+_aws_region_default = _secrets.get("AWS_DEFAULT_REGION", "us-east-1")
 
 def _make_aws_client() -> AWSIntelligenceClient:
     c = st.session_state.aws_creds
     return AWSIntelligenceClient(
-        access_key    = c.get("key",    ""),
-        secret_key    = c.get("secret", ""),
-        region        = c.get("region", "us-east-1"),
-        session_token = c.get("token",  ""),
+        role_arn    = c.get("role_arn",    ""),
+        external_id = c.get("external_id", ""),
+        region      = c.get("region",      "us-east-1"),
+        auth_method = c.get("auth_method", "env"),
     )
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -466,27 +465,68 @@ with st.sidebar:
             st.warning("Fill in all ServiceNow fields first.")
 
     st.markdown("### ☁️ AWS Account")
-    if _aws_key_default:
-        st.info("AWS credentials loaded from secrets ✓")
-    aws_key    = st.text_input("Access Key ID",       value=_aws_key_default,    type="password", placeholder="AKIA...")
-    aws_secret = st.text_input("Secret Access Key",   value=_aws_secret_default, type="password", placeholder="wJalr...")
-    aws_token  = st.text_input("Session Token",       value=_aws_token_default,  type="password", placeholder="(optional — for STS assumed roles)")
-    aws_region = st.selectbox("Region", [
+
+    _regions = [
         "us-east-1","us-east-2","us-west-1","us-west-2",
         "eu-west-1","eu-west-2","eu-central-1",
         "ap-southeast-1","ap-southeast-2","ap-northeast-1",
-    ], index=["us-east-1","us-east-2","us-west-1","us-west-2",
-              "eu-west-1","eu-west-2","eu-central-1",
-              "ap-southeast-1","ap-southeast-2","ap-northeast-1"].index(_aws_region_default)
-       if _aws_region_default in ["us-east-1","us-east-2","us-west-1","us-west-2",
-                                   "eu-west-1","eu-west-2","eu-central-1",
-                                   "ap-southeast-1","ap-southeast-2","ap-northeast-1"] else 0)
+    ]
+
+    # Auth method toggle
+    _auth_labels = ["🔐 IAM Role (AssumeRole)", "🖥️ Environment / Instance Profile"]
+    _auth_idx    = 1 if not _aws_role_default else 0
+    _auth_choice = st.radio(
+        "Auth Method", _auth_labels, index=_auth_idx,
+        help="Enterprise standard: supply a Role ARN — no long-lived keys needed. "
+             "On EC2/ECS/Lambda: choose Environment to use the attached instance/task role automatically.",
+    )
+    _use_role = (_auth_choice == _auth_labels[0])
+
+    if _use_role:
+        if _aws_role_default:
+            st.success("Role ARN loaded from secrets ✓")
+        aws_role_arn = st.text_input(
+            "Role ARN", value=_aws_role_default,
+            placeholder="arn:aws:iam::123456789012:role/CISCloudShieldRole",
+        )
+        aws_ext_id = st.text_input(
+            "External ID  *(optional)*", value=_aws_ext_id_default,
+            placeholder="CISCloudShield-ExternalId",
+        )
+        st.caption("Add this trust policy to the target role:")
+        st.code(
+            '{\n  "Effect":"Allow",\n  "Principal":{"AWS":"<deployer-ARN>"},\n'
+            '  "Action":"sts:AssumeRole"\n}',
+            language="json",
+        )
+    else:
+        aws_role_arn = ""
+        aws_ext_id   = ""
+        st.info(
+            "Credentials will be sourced automatically from:\n"
+            "- EC2 Instance Profile\n"
+            "- ECS Task Role\n"
+            "- Lambda Execution Role\n"
+            "- AWS SSO / environment variables"
+        )
+
+    aws_region = st.selectbox(
+        "Region", _regions,
+        index=_regions.index(_aws_region_default) if _aws_region_default in _regions else 0,
+    )
 
     if st.button("🔌 Connect to AWS", use_container_width=True):
-        if aws_key and aws_secret:
-            st.session_state.aws_creds = {"key": aws_key, "secret": aws_secret,
-                                           "token": aws_token, "region": aws_region}
-            with st.spinner("Verifying identity…"):
+        if _use_role and not aws_role_arn:
+            st.warning("Enter a Role ARN to use AssumeRole authentication.")
+        else:
+            st.session_state.aws_creds = {
+                "role_arn":    aws_role_arn,
+                "external_id": aws_ext_id,
+                "region":      aws_region,
+                "auth_method": "role" if _use_role else "env",
+            }
+            _spinner_msg = "Assuming role and verifying identity…" if _use_role else "Verifying identity via instance profile…"
+            with st.spinner(_spinner_msg):
                 result = _make_aws_client().test_connection()
             if result["ok"]:
                 st.session_state.aws_connected  = True
@@ -497,8 +537,6 @@ with st.sidebar:
             else:
                 st.session_state.aws_connected = False
                 st.error(f"Connection failed: {result['error']}")
-        else:
-            st.warning("Enter Access Key ID and Secret Access Key.")
 
     if st.session_state.aws_connected:
         st.success(f"🟢 Live — Account {st.session_state.get('aws_account_id','')}")
