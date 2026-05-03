@@ -35,10 +35,11 @@ body, .stApp { background:#060d18; }
 
 /* ── login ── */
 .login-wrap {
-    max-width:480px; margin:80px auto; padding:48px 40px;
+    padding:40px 32px 28px;
     background:linear-gradient(160deg,#0d1b2a 0%,#091220 100%);
     border:1px solid #1f3a5f; border-radius:20px;
     box-shadow:0 0 60px rgba(0,170,255,0.15);
+    margin-top:60px; margin-bottom:16px;
 }
 .logo-ring {
     width:90px;height:90px;border-radius:50%;margin:0 auto 18px;
@@ -99,28 +100,26 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    st.markdown("""
-    <div class="login-wrap">
-      <div class="logo-ring">🛡️</div>
-      <div class="infosys-badge">Infosys · Cloud Infrastructure Services</div>
-      <div class="app-title">CIS Cloud Shield</div>
-      <div class="app-sub">Agentic AI · AWS Security · Immutable Backup</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Centre the form inputs using columns
-    _, mid, _ = st.columns([1, 1.6, 1])
+    # Single narrow column holds both the card and the form inputs
+    _, mid, _ = st.columns([3, 2, 3])
     with mid:
-        username = st.text_input("Username", placeholder="Enter username")
-        password = st.text_input("Password", type="password", placeholder="Enter password")
-        if st.button("🔐 Sign In", type="primary", use_container_width=True):
-            # Demo credentials — replace with real auth in production
+        st.markdown("""
+        <div class="login-wrap">
+          <div class="logo-ring">🛡️</div>
+          <div class="infosys-badge">Infosys · Cloud Infrastructure Services</div>
+          <div class="app-title">CIS Cloud Shield</div>
+          <div class="app-sub">Agentic AI · AWS Security · Immutable Backup</div>
+        </div>
+        """, unsafe_allow_html=True)
+        username = st.text_input("Username", placeholder="Enter username", label_visibility="collapsed")
+        password = st.text_input("Password", type="password", placeholder="Enter password", label_visibility="collapsed")
+        if st.button("🔐  Sign In", type="primary", use_container_width=True):
             if username == "admin" and password == "Infosys@123":
                 st.session_state.authenticated = True
                 st.session_state.login_user    = username
                 st.rerun()
             else:
-                st.error("Invalid credentials. Try admin / Infosys@123")
+                st.error("Invalid credentials. Use admin / Infosys@123")
         st.caption("🔒 Protected by Infosys CIS · TLS encrypted · Session-scoped access")
     st.stop()
 
