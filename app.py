@@ -1,6 +1,6 @@
 """
-AWS Security & Backup Intelligence Platform
-Two-module Streamlit prototype using OpenAI multi-agent orchestration and ServiceNow integration.
+Infosys CIS Cloud Shield
+Agentic AI platform for AWS credential remediation and immutable backup governance.
 """
 
 import streamlit as st
@@ -13,19 +13,73 @@ from datetime import datetime
 
 from mock_data import get_credential_findings, get_app_inventory, BACKUP_TECHNOLOGIES
 from servicenow import ServiceNowClient
+from aws_client import AWSIntelligenceClient
+
+APP_NAME    = "CIS Cloud Shield"
+APP_TAGLINE = "Agentic AI · AWS Security · Immutable Backup"
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
 st.set_page_config(
-    page_title="AWS Security & Backup Intelligence",
+    page_title=f"Infosys {APP_NAME}",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ── Custom CSS ────────────────────────────────────────────────────────────────
+# ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* ── base ── */
 [data-testid="stSidebar"] { background:#0d1117; }
+body, .stApp { background:#060d18; }
+
+/* ── login ── */
+.login-wrap {
+    max-width:480px; margin:80px auto; padding:48px 40px;
+    background:linear-gradient(160deg,#0d1b2a 0%,#091220 100%);
+    border:1px solid #1f3a5f; border-radius:20px;
+    box-shadow:0 0 60px rgba(0,170,255,0.15);
+}
+.logo-ring {
+    width:90px;height:90px;border-radius:50%;margin:0 auto 18px;
+    background:linear-gradient(135deg,#00aaff,#0044cc,#7c3aed);
+    display:flex;align-items:center;justify-content:center;
+    font-size:38px;box-shadow:0 0 30px rgba(0,170,255,0.4);
+}
+.app-title {
+    font-size:26px;font-weight:800;color:#fff;text-align:center;
+    letter-spacing:.5px;margin-bottom:4px;
+}
+.app-sub {
+    font-size:13px;color:#6b8aad;text-align:center;margin-bottom:28px;
+}
+.infosys-badge {
+    font-size:11px;color:#00aaff;text-align:center;
+    letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;
+}
+
+/* ── top header bar ── */
+.topbar {
+    display:flex;align-items:center;gap:16px;
+    padding:12px 24px;
+    background:linear-gradient(90deg,#060d18 0%,#0d1b2a 50%,#060d18 100%);
+    border-bottom:1px solid #1f3a5f;
+    margin-bottom:12px;
+}
+.topbar-logo {
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,#00aaff,#0044cc,#7c3aed);
+    display:flex;align-items:center;justify-content:center;font-size:20px;
+    box-shadow:0 0 16px rgba(0,170,255,0.35);flex-shrink:0;
+}
+.topbar-name { font-size:20px;font-weight:800;color:#fff; }
+.topbar-tag  { font-size:12px;color:#6b8aad; }
+.topbar-pill {
+    margin-left:auto;background:#0a2a4a;border:1px solid #00aaff33;
+    color:#00aaff;font-size:11px;padding:4px 12px;border-radius:20px;
+}
+
+/* ── agent cards ── */
 .agent-card {
     background:#0d1b2a; border:1px solid #1f3a5f;
     border-radius:10px; padding:14px 16px; margin-bottom:10px; text-align:center;
@@ -33,37 +87,93 @@ st.markdown("""
 .agent-idle   { border-color:#334; }
 .agent-active { border-color:#00aaff; box-shadow:0 0 14px rgba(0,170,255,0.25); }
 .agent-done   { border-color:#00cc88; }
-.kpi-box {
-    background:#111827; border:1px solid #1f2937;
-    border-radius:8px; padding:14px; text-align:center;
-}
-.snow-row { background:#0f2218; border:1px solid #1a4a2a; border-radius:6px; padding:8px 12px; margin:4px 0; }
+
+/* ── misc ── */
+.kpi-box { background:#111827;border:1px solid #1f2937;border-radius:8px;padding:14px;text-align:center; }
+.snow-row { background:#0f2218;border:1px solid #1a4a2a;border-radius:6px;padding:8px 12px;margin:4px 0; }
 </style>
 """, unsafe_allow_html=True)
 
+# ── Login gate ────────────────────────────────────────────────────────────────
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.markdown("""
+    <div class="login-wrap">
+      <div class="logo-ring">🛡️</div>
+      <div class="infosys-badge">Infosys · Cloud Infrastructure Services</div>
+      <div class="app-title">CIS Cloud Shield</div>
+      <div class="app-sub">Agentic AI · AWS Security · Immutable Backup</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Centre the form inputs using columns
+    _, mid, _ = st.columns([1, 1.6, 1])
+    with mid:
+        username = st.text_input("Username", placeholder="Enter username")
+        password = st.text_input("Password", type="password", placeholder="Enter password")
+        if st.button("🔐 Sign In", type="primary", use_container_width=True):
+            # Demo credentials — replace with real auth in production
+            if username == "admin" and password == "Infosys@123":
+                st.session_state.authenticated = True
+                st.session_state.login_user    = username
+                st.rerun()
+            else:
+                st.error("Invalid credentials. Try admin / Infosys@123")
+        st.caption("🔒 Protected by Infosys CIS · TLS encrypted · Session-scoped access")
+    st.stop()
+
+# ── App header (shown only when authenticated) ────────────────────────────────
+st.markdown(f"""
+<div class="topbar">
+  <div class="topbar-logo">🛡️</div>
+  <div>
+    <div class="topbar-name">Infosys &nbsp;<span style="color:#00aaff">{APP_NAME}</span></div>
+    <div class="topbar-tag">{APP_TAGLINE}</div>
+  </div>
+  <div class="topbar-pill">👤 {st.session_state.get('login_user','admin')}</div>
+</div>
+""", unsafe_allow_html=True)
+
 # ── Session state initialisation ──────────────────────────────────────────────
-if "findings" not in st.session_state:
-    st.session_state.findings = get_credential_findings(1200)
-if "apps" not in st.session_state:
-    st.session_state.apps = get_app_inventory(250)
-if "agent_outputs" not in st.session_state:
-    st.session_state.agent_outputs = {}
-if "agent_statuses" not in st.session_state:
-    st.session_state.agent_statuses = {1: "idle", 2: "idle", 3: "idle", 4: "idle"}
-if "snow_tickets" not in st.session_state:
-    st.session_state.snow_tickets = {}      # app_id → {number, sys_id, url}
-if "cred_tickets" not in st.session_state:
-    st.session_state.cred_tickets = {}      # finding_id → {number, sys_id, url}
+if "findings"       not in st.session_state: st.session_state.findings       = get_credential_findings(1200)
+if "apps"           not in st.session_state: st.session_state.apps           = get_app_inventory(250)
+if "agent_outputs"  not in st.session_state: st.session_state.agent_outputs  = {}
+if "agent_statuses" not in st.session_state: st.session_state.agent_statuses = {1:"idle",2:"idle",3:"idle",4:"idle"}
+if "snow_tickets"   not in st.session_state: st.session_state.snow_tickets   = {}
+if "cred_tickets"   not in st.session_state: st.session_state.cred_tickets   = {}
+if "aws_connected"  not in st.session_state: st.session_state.aws_connected  = False
+if "aws_creds"      not in st.session_state: st.session_state.aws_creds      = {}
+if "live_iam"       not in st.session_state: st.session_state.live_iam       = []
+if "live_hub"       not in st.session_state: st.session_state.live_hub       = []
+if "live_secrets"   not in st.session_state: st.session_state.live_secrets   = []
+if "live_backup"    not in st.session_state: st.session_state.live_backup    = []
+if "live_plans"     not in st.session_state: st.session_state.live_plans     = []
+if "live_vaults"    not in st.session_state: st.session_state.live_vaults    = []
 
 findings_df = pd.DataFrame(st.session_state.findings)
 apps_df     = pd.DataFrame(st.session_state.apps)
 
-# ── Load secrets (Streamlit Cloud injects these; sidebar inputs used as fallback) ──
-_secrets = st.secrets if hasattr(st, "secrets") else {}
-_oai_from_secrets   = _secrets.get("OPENAI_API_KEY", "")
-_snow_url_default   = _secrets.get("SNOW_URL",  "https://dev218436.service-now.com")
-_snow_user_default  = _secrets.get("SNOW_USER", "admin")
-_snow_pass_default  = _secrets.get("SNOW_PASS", "")
+# ── Load secrets (Streamlit Cloud injects these; sidebar inputs are fallback) ──
+_secrets            = st.secrets if hasattr(st, "secrets") else {}
+_oai_from_secrets   = _secrets.get("OPENAI_API_KEY",  "")
+_snow_url_default   = _secrets.get("SNOW_URL",         "https://dev218436.service-now.com")
+_snow_user_default  = _secrets.get("SNOW_USER",        "admin")
+_snow_pass_default  = _secrets.get("SNOW_PASS",        "")
+_aws_key_default    = _secrets.get("AWS_ACCESS_KEY_ID",     "")
+_aws_secret_default = _secrets.get("AWS_SECRET_ACCESS_KEY", "")
+_aws_token_default  = _secrets.get("AWS_SESSION_TOKEN",     "")
+_aws_region_default = _secrets.get("AWS_DEFAULT_REGION",    "us-east-1")
+
+def _make_aws_client() -> AWSIntelligenceClient:
+    c = st.session_state.aws_creds
+    return AWSIntelligenceClient(
+        access_key    = c.get("key",    ""),
+        secret_key    = c.get("secret", ""),
+        region        = c.get("region", "us-east-1"),
+        session_token = c.get("token",  ""),
+    )
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -93,6 +203,44 @@ with st.sidebar:
         else:
             st.warning("Fill in all ServiceNow fields first.")
 
+    st.markdown("### ☁️ AWS Account")
+    if _aws_key_default:
+        st.info("AWS credentials loaded from secrets ✓")
+    aws_key    = st.text_input("Access Key ID",       value=_aws_key_default,    type="password", placeholder="AKIA...")
+    aws_secret = st.text_input("Secret Access Key",   value=_aws_secret_default, type="password", placeholder="wJalr...")
+    aws_token  = st.text_input("Session Token",       value=_aws_token_default,  type="password", placeholder="(optional — for STS assumed roles)")
+    aws_region = st.selectbox("Region", [
+        "us-east-1","us-east-2","us-west-1","us-west-2",
+        "eu-west-1","eu-west-2","eu-central-1",
+        "ap-southeast-1","ap-southeast-2","ap-northeast-1",
+    ], index=["us-east-1","us-east-2","us-west-1","us-west-2",
+              "eu-west-1","eu-west-2","eu-central-1",
+              "ap-southeast-1","ap-southeast-2","ap-northeast-1"].index(_aws_region_default)
+       if _aws_region_default in ["us-east-1","us-east-2","us-west-1","us-west-2",
+                                   "eu-west-1","eu-west-2","eu-central-1",
+                                   "ap-southeast-1","ap-southeast-2","ap-northeast-1"] else 0)
+
+    if st.button("🔌 Connect to AWS", use_container_width=True):
+        if aws_key and aws_secret:
+            st.session_state.aws_creds = {"key": aws_key, "secret": aws_secret,
+                                           "token": aws_token, "region": aws_region}
+            with st.spinner("Verifying identity…"):
+                result = _make_aws_client().test_connection()
+            if result["ok"]:
+                st.session_state.aws_connected  = True
+                st.session_state.aws_account_id = result["account_id"]
+                st.session_state.aws_arn        = result["arn"]
+                st.success(f"✅ Connected\n**Account:** {result['account_id']}")
+                st.caption(result["arn"])
+            else:
+                st.session_state.aws_connected = False
+                st.error(f"Connection failed: {result['error']}")
+        else:
+            st.warning("Enter Access Key ID and Secret Access Key.")
+
+    if st.session_state.aws_connected:
+        st.success(f"🟢 Live — Account {st.session_state.get('aws_account_id','')}")
+
     st.divider()
     st.markdown("### 📊 Environment")
     crit  = len(findings_df[findings_df.severity == "CRITICAL"])
@@ -110,9 +258,10 @@ with st.sidebar:
 # ═════════════════════════════════════════════════════════════════════════════
 # TABS
 # ═════════════════════════════════════════════════════════════════════════════
-tab1, tab2 = st.tabs([
+tab1, tab2, tab3 = st.tabs([
     "🔐  Credential Intelligence",
     "💾  Backup Intelligence",
+    "🔄  Auto-Remediation Loop",
 ])
 
 
@@ -382,8 +531,72 @@ with tab1:
 
     st.divider()
 
+    # ── Live AWS IAM Scan ─────────────────────────────────────────────────────
+    st.subheader("☁️ Live AWS Credential Scan")
+    if not st.session_state.aws_connected:
+        st.info("Connect to an AWS account in the sidebar to enable live IAM scanning.")
+    else:
+        acct = st.session_state.get("aws_account_id", "")
+        st.markdown(f"**Connected account:** `{acct}` · region `{st.session_state.aws_creds.get('region','us-east-1')}`")
+        lc1, lc2, lc3 = st.columns(3)
+
+        if lc1.button("🔍 Scan IAM Credential Report", use_container_width=True):
+            with st.spinner("Generating IAM credential report…"):
+                client = _make_aws_client()
+                client.account_id = acct
+                st.session_state.live_iam = client.get_iam_findings()
+            st.success(f"IAM scan complete — {len(st.session_state.live_iam)} findings")
+
+        if lc2.button("🔐 List Secrets Manager", use_container_width=True):
+            with st.spinner("Listing Secrets Manager secrets…"):
+                client = _make_aws_client()
+                st.session_state.live_secrets = client.get_secrets_inventory()
+            st.success(f"Found {len(st.session_state.live_secrets)} secrets")
+
+        if lc3.button("🛡️ Security Hub Findings", use_container_width=True):
+            with st.spinner("Querying Security Hub…"):
+                client = _make_aws_client()
+                st.session_state.live_hub = client.get_security_hub_findings(200)
+            st.success(f"Security Hub returned {len(st.session_state.live_hub)} active failed controls")
+
+        # IAM findings table
+        if st.session_state.live_iam:
+            st.markdown("#### 🔑 IAM Findings (Live)")
+            lidf = pd.DataFrame(st.session_state.live_iam)
+            sev_filter_live = st.multiselect("Filter severity (IAM)", ["CRITICAL","HIGH","MEDIUM","LOW"],
+                                              default=["CRITICAL","HIGH"], key="iam_sev_filter")
+            if sev_filter_live:
+                lidf = lidf[lidf.severity.isin(sev_filter_live)]
+            st.dataframe(lidf[["id","application","credential_type","severity",
+                                "file_location","age_days","status"]],
+                         use_container_width=True)
+            lc = lidf.severity.value_counts().reset_index()
+            lc.columns = ["Severity","Count"]
+            fig = px.bar(lc, x="Severity", y="Count", title="Live IAM Finding Severity",
+                         color="Severity",
+                         color_discrete_map={"CRITICAL":"#ff2244","HIGH":"#ff7700","MEDIUM":"#ffcc00","LOW":"#22cc66"})
+            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Secrets Manager table
+        if st.session_state.live_secrets:
+            with st.expander(f"🔐 Secrets Manager Inventory ({len(st.session_state.live_secrets)} secrets)"):
+                sdf = pd.DataFrame(st.session_state.live_secrets)
+                st.dataframe(sdf[["name","rotation_enabled","last_rotated_days","last_changed","description"]],
+                             use_container_width=True,
+                             column_config={"rotation_enabled": st.column_config.CheckboxColumn("Auto-Rotate")})
+
+        # Security Hub findings table
+        if st.session_state.live_hub:
+            with st.expander(f"🛡️ Security Hub — {len(st.session_state.live_hub)} Active Failures"):
+                hdf = pd.DataFrame(st.session_state.live_hub)
+                st.dataframe(hdf[["control_id","title","severity","resource_type","resource_id","created_at"]],
+                             use_container_width=True)
+
+    st.divider()
+
     # ── Charts ────────────────────────────────────────────────────────────────
-    st.subheader("📊 Analytics")
+    st.subheader("📊 Mock Data Analytics (1,200 simulated findings)")
     ch1, ch2, ch3 = st.columns(3)
 
     with ch1:
@@ -635,6 +848,143 @@ with tab2:
 
     st.divider()
 
+    # ── Live AWS Backup Scan ───────────────────────────────────────────────────
+    st.subheader("☁️ Live AWS Backup Coverage")
+    if not st.session_state.aws_connected:
+        st.info("Connect to an AWS account in the sidebar to scan real backup coverage.")
+    else:
+        acct   = st.session_state.get("aws_account_id", "")
+        region = st.session_state.aws_creds.get("region", "us-east-1")
+        st.markdown(f"**Account:** `{acct}` · **Region:** `{region}`")
+
+        bc1, bc2, bc3 = st.columns(3)
+        if bc1.button("📦 Scan Backup Coverage (EC2/RDS/S3/DDB)", use_container_width=True):
+            with st.spinner("Querying EC2, RDS, S3, DynamoDB and AWS Backup…"):
+                client = _make_aws_client()
+                client.account_id = acct
+                st.session_state.live_backup = client.get_all_backup_status()
+            st.success(f"Scanned {len(st.session_state.live_backup)} resources")
+
+        if bc2.button("📋 List Backup Plans", use_container_width=True):
+            with st.spinner("Fetching AWS Backup plans…"):
+                client = _make_aws_client()
+                st.session_state.live_plans = client.get_backup_plans()
+            st.success(f"Found {len(st.session_state.live_plans)} backup plans")
+
+        if bc3.button("🔒 Check Vault Lock Status", use_container_width=True):
+            with st.spinner("Checking backup vault immutability…"):
+                client = _make_aws_client()
+                st.session_state.live_vaults = client.get_backup_vaults()
+            st.success(f"Found {len(st.session_state.live_vaults)} vaults")
+
+        # Live backup coverage table
+        if st.session_state.live_backup:
+            lbdf = pd.DataFrame(st.session_state.live_backup)
+            live_unp  = len(lbdf[lbdf.backup_status == "Unprotected"])
+            live_part = len(lbdf[lbdf.backup_status == "Partial"])
+            live_prot = len(lbdf[lbdf.backup_status == "Protected"])
+            live_immut = int(lbdf["immutable_backup"].sum())
+
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Total Resources", len(lbdf))
+            m2.metric("Protected",       live_prot,  delta=f"{live_prot/max(len(lbdf),1)*100:.0f}%")
+            m3.metric("Unprotected",     live_unp,   delta="Gap", delta_color="inverse")
+            m4.metric("Immutable",       live_immut)
+
+            # Charts
+            lbc1, lbc2 = st.columns(2)
+            with lbc1:
+                sc = lbdf.backup_status.value_counts().reset_index()
+                sc.columns = ["Status","Count"]
+                fig = px.pie(sc, values="Count", names="Status",
+                             title=f"Live Backup Coverage — {acct}",
+                             color="Status",
+                             color_discrete_map={"Protected":"#00cc88","Partial":"#ffcc00","Unprotected":"#ff2244"})
+                fig.update_layout(paper_bgcolor="rgba(0,0,0,0)")
+                st.plotly_chart(fig, use_container_width=True)
+            with lbc2:
+                ts = lbdf.groupby(["type","backup_status"]).size().reset_index(name="Count")
+                fig = px.bar(ts, x="type", y="Count", color="backup_status",
+                             title="Coverage by Resource Type", barmode="stack",
+                             color_discrete_map={"Protected":"#00cc88","Partial":"#ffcc00","Unprotected":"#ff2244"})
+                fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", xaxis_tickangle=30)
+                st.plotly_chart(fig, use_container_width=True)
+
+            # Resource table
+            st.markdown("#### Resource Inventory")
+            gap_only = st.checkbox("Show gaps only (Unprotected + Partial)", value=True, key="live_gap_only")
+            disp = lbdf[lbdf.backup_status != "Protected"] if gap_only else lbdf
+            st.dataframe(
+                disp[["app_id","application","type","environment","backup_status",
+                       "backup_solution","immutable_backup","rpo_requirement","rto_requirement"]],
+                use_container_width=True,
+                column_config={"immutable_backup": st.column_config.CheckboxColumn("Immutable")},
+            )
+            st.caption(f"Showing {len(disp)} of {len(lbdf)} resources")
+
+            # Quick ServiceNow tickets for live gaps
+            live_gaps = lbdf[lbdf.backup_status.isin(["Unprotected","Partial"])]
+            if len(live_gaps) > 0:
+                st.markdown(f"**{len(live_gaps)} resources need backup remediation**")
+                if st.button(f"🎫 Raise SNOW Incidents for Live Backup Gaps ({min(len(live_gaps),10)})",
+                             use_container_width=True, key="live_snow_btn"):
+                    if not (snow_url and snow_user and snow_pass):
+                        st.error("Configure ServiceNow in the sidebar.")
+                    else:
+                        snow  = ServiceNowClient(snow_url, snow_user, snow_pass)
+                        to_t  = live_gaps.head(10)
+                        pb    = st.progress(0)
+                        rows  = []
+                        for idx2, (_, app) in enumerate(to_t.iterrows()):
+                            urg = 1 if app.criticality in ("Mission Critical",) else 2
+                            imp = 2
+                            desc = (
+                                f"LIVE AWS BACKUP GAP — Account {acct}\n\n"
+                                f"Resource ID:    {app.app_id}\n"
+                                f"Resource Name:  {app.application}\n"
+                                f"Type:           {app.type}\n"
+                                f"Region:         {app.region}\n"
+                                f"Environment:    {app.environment}\n"
+                                f"Backup Status:  {app.backup_status}\n"
+                                f"Current Backup: {app.backup_solution}\n"
+                                f"Immutable:      {'Yes' if app.immutable_backup else 'No — REQUIRED'}\n\n"
+                                f"RPO Requirement: {app.rpo_requirement}\n"
+                                f"RTO Requirement: {app.rto_requirement}\n\n"
+                                f"ACTION: Enrol in AWS Backup with Vault Lock enabled.\n"
+                                f"Scanned: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}"
+                            )
+                            res2 = snow.create_incident(
+                                short_description=f"[LIVE BACKUP GAP] {app.application} — {app.type} — {app.backup_status}",
+                                description=desc, urgency=urg, impact=imp,
+                            )
+                            rows.append({
+                                "Resource": app.application, "Type": app.type,
+                                "Ticket": res2.get("number","—"), "URL": res2.get("url","—"),
+                                "Status": "✅ Created" if res2["ok"] else f"❌ {res2.get('error','')}",
+                            })
+                            pb.progress((idx2 + 1) / len(to_t))
+                        st.dataframe(pd.DataFrame(rows), use_container_width=True,
+                                     column_config={"URL": st.column_config.LinkColumn("SNOW Link")})
+
+        # Backup plans
+        if st.session_state.live_plans:
+            with st.expander(f"📋 AWS Backup Plans ({len(st.session_state.live_plans)})"):
+                st.dataframe(pd.DataFrame(st.session_state.live_plans), use_container_width=True)
+
+        # Vault lock status
+        if st.session_state.live_vaults:
+            vdf = pd.DataFrame(st.session_state.live_vaults)
+            with st.expander(f"🔒 Backup Vault Status ({len(vdf)} vaults)"):
+                st.dataframe(vdf, use_container_width=True,
+                             column_config={"locked":   st.column_config.CheckboxColumn("WORM Locked"),
+                                            "immutable":st.column_config.CheckboxColumn("Immutable")})
+                locked_n   = int(vdf["locked"].sum())
+                unlocked_n = len(vdf) - locked_n
+                st.markdown(f"- 🔒 **{locked_n}** vaults have Vault Lock (WORM) enabled")
+                st.markdown(f"- ⚠️  **{unlocked_n}** vaults are NOT immutably locked")
+
+    st.divider()
+
     # ── Backup technology comparison ──────────────────────────────────────────
     st.subheader("🔧 Backup Technology Evaluation")
 
@@ -730,3 +1080,286 @@ with tab2:
 | **AWS Health** | Pre-emptive alerts on region/AZ incidents |
 | **EventBridge** | Trigger restore tests post-backup completion |
         """)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# TAB 3 — AUTO-REMEDIATION LOOP
+# ═════════════════════════════════════════════════════════════════════════════
+with tab3:
+    st.title("🔄 Auto-Remediation Agent Loop")
+    st.markdown(
+        "*Continuous 4-phase agentic loop: INC Agent → Dispatcher → Remediator → INC Agent closes ticket*"
+    )
+    st.markdown("""
+```
+Vulnerability Detected
+        ↓
+ ┌─────────────────┐
+ │   INC Agent     │  Creates ServiceNow incident · classifies · hands off
+ └────────┬────────┘
+          │ handoff
+ ┌────────▼────────┐
+ │ Dispatcher Agent│  Investigates root cause · coordinates remediation
+ └────────┬────────┘
+          │
+ ┌────────▼────────┐
+ │ Remediator Agent│  Executes fix · validates · produces resolution note
+ └────────┬────────┘
+          │ handoff back
+ ┌────────▼────────┐
+ │   INC Agent     │  Updates SNOW · writes resolution · CLOSES incident ✅
+ └─────────────────┘
+          ↓
+   Next finding → loop repeats
+```
+""")
+    st.divider()
+
+    # ── Configuration ─────────────────────────────────────────────────────────
+    rc1, rc2, rc3 = st.columns(3)
+    data_source = rc1.radio("Finding source", ["Mock data (demo)", "Live IAM scan"])
+    max_loop    = rc2.number_input("Findings to process", 1, 20, 3)
+    sev_target  = rc3.multiselect("Target severity", ["CRITICAL","HIGH","MEDIUM"],
+                                   default=["CRITICAL","HIGH"])
+
+    # Build finding pool
+    if data_source == "Live IAM scan" and st.session_state.live_iam:
+        pool_df = pd.DataFrame(st.session_state.live_iam)
+    else:
+        pool_df = findings_df.copy()
+
+    if sev_target:
+        pool_df = pool_df[pool_df.severity.isin(sev_target)]
+
+    pool_df = pool_df[pool_df.status != "Resolved"].head(50)
+    st.info(f"**{len(pool_df)}** eligible findings available · will process up to **{max_loop}**")
+
+    if not st.session_state.aws_connected and data_source == "Live IAM scan":
+        st.warning("Connect to AWS in the sidebar first to use live IAM findings.")
+
+    start_btn = st.button(
+        "▶️ Start Auto-Remediation Loop", type="primary", use_container_width=True,
+        disabled=(not openai_key or not snow_url or not snow_user or not snow_pass)
+    )
+    if not openai_key:
+        st.caption("⚠️ OpenAI key required (sidebar)")
+    if not (snow_url and snow_user and snow_pass):
+        st.caption("⚠️ ServiceNow credentials required (sidebar)")
+
+    # ── Agent system prompts ───────────────────────────────────────────────────
+    INC_CREATE_PROMPT = """You are the INC Agent — an enterprise ITSM incident manager.
+A security vulnerability has been detected. Your job:
+1. Write a concise incident summary (3-4 sentences)
+2. Classify business impact (CRITICAL / HIGH / MEDIUM / LOW)
+3. State the initial SLA target
+4. Write a formal handoff note to the Dispatcher Agent with all context they need
+
+Be precise. Use markdown. Max 300 words."""
+
+    DISPATCHER_INVESTIGATE_PROMPT = """You are the Dispatcher Agent — a senior security investigator.
+You receive incidents from the INC Agent. Investigate this finding:
+1. Root Cause Analysis — why did this happen? (mis-config, process failure, tooling gap)
+2. Scope — which systems/accounts are at risk beyond this finding
+3. Attack Vector — concrete exploitation path if unmitigated
+4. Remediation Plan — numbered steps, specific and actionable
+
+Be technical. Reference AWS services. Max 350 words."""
+
+    REMEDIATOR_PROMPT = """You are the Remediator Agent — a DevSecOps engineer executing the fix.
+Based on the Dispatcher's investigation, carry out the remediation:
+1. Remediation Actions — list each step as COMPLETED ✓
+2. AWS CLI or Python code that was executed
+3. Validation check — how you confirmed the fix worked
+4. Residual Risk — anything left open
+5. Handoff summary for INC Agent to close the incident
+
+Write in past tense (actions already done). Max 400 words."""
+
+    INC_CLOSE_PROMPT = """You are the INC Agent. The Dispatcher and Remediator have completed their work.
+Write the formal incident closure:
+1. Resolution Summary (2-3 sentences for the SNOW ticket)
+2. Root Cause (one sentence)
+3. Fix Applied (one sentence)
+4. Prevention Recommendation (one sentence)
+5. Final declaration: "Incident RESOLVED and CLOSED ✅"
+
+Be concise. This goes into ServiceNow. Max 200 words."""
+
+    # ── Colour scheme per agent ────────────────────────────────────────────────
+    AGENT_STYLE = {
+        "INC Agent":           {"color": "#00aaff", "icon": "🎫"},
+        "Dispatcher Agent":    {"color": "#ff8800", "icon": "📡"},
+        "Remediator Agent":    {"color": "#cc44ff", "icon": "🔧"},
+        "INC Agent (closure)": {"color": "#00cc88", "icon": "✅"},
+    }
+
+    def stream_agent(oai, model, system, user_msg, label, placeholder):
+        """Stream an OpenAI call, render live, return full text."""
+        messages = [
+            {"role": "system",  "content": system},
+            {"role": "user",    "content": user_msg},
+        ]
+        style   = AGENT_STYLE.get(label, {"color":"#aaa","icon":"🤖"})
+        full    = ""
+        stream  = oai.chat.completions.create(
+            model=model, messages=messages, stream=True, max_tokens=600
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                full += delta
+                placeholder.markdown(
+                    f"<div style='border-left:3px solid {style['color']};"
+                    f"padding:10px 14px;margin:4px 0;border-radius:0 8px 8px 0;"
+                    f"background:#0d1b2a;font-size:13px'>"
+                    f"<span style='color:{style['color']};font-weight:700'>"
+                    f"{style['icon']} {label}</span><br>{full}▌</div>",
+                    unsafe_allow_html=True,
+                )
+        placeholder.markdown(
+            f"<div style='border-left:3px solid {style['color']};"
+            f"padding:10px 14px;margin:4px 0;border-radius:0 8px 8px 0;"
+            f"background:#0d1b2a;font-size:13px'>"
+            f"<span style='color:{style['color']};font-weight:700'>"
+            f"{style['icon']} {label}</span><br>{full}</div>",
+            unsafe_allow_html=True,
+        )
+        return full
+
+    # ── Main loop ──────────────────────────────────────────────────────────────
+    if start_btn:
+        if len(pool_df) == 0:
+            st.error("No findings match the selected filters.")
+        else:
+            oai   = openai.OpenAI(api_key=openai_key)
+            snow  = ServiceNowClient(snow_url, snow_user, snow_pass)
+            to_process = pool_df.head(max_loop).to_dict("records")
+            summary_rows = []
+
+            overall_pb = st.progress(0, text="Starting remediation loop…")
+
+            for loop_idx, finding in enumerate(to_process):
+                overall_pb.progress(loop_idx / len(to_process),
+                                    text=f"Processing finding {loop_idx+1}/{len(to_process)}: {finding['id']}")
+
+                with st.expander(
+                    f"{'🔴' if finding['severity']=='CRITICAL' else '🟠' if finding['severity']=='HIGH' else '🟡'} "
+                    f"**{finding['id']}** · {finding['credential_type']} · {finding['application']} "
+                    f"· {finding['severity']}",
+                    expanded=(loop_idx == 0),
+                ):
+                    finding_ctx = json.dumps({
+                        k: finding[k] for k in
+                        ["id","application","environment","credential_type","service",
+                         "severity","file_location","detected_date","commit_author","repository"]
+                        if k in finding
+                    }, indent=2)
+
+                    # ── PHASE 1: INC Agent creates incident ────────────────────
+                    st.markdown("---")
+                    ph1 = st.empty()
+                    inc_output = stream_agent(
+                        oai, llm_model,
+                        INC_CREATE_PROMPT,
+                        f"Security finding requiring incident creation:\n\n{finding_ctx}",
+                        "INC Agent",
+                        ph1,
+                    )
+
+                    # Create real ServiceNow incident
+                    snow_result = snow.create_incident(
+                        short_description=f"[AUTO-REMEDIATION] {finding['credential_type']} — "
+                                         f"{finding['application']} — {finding['severity']}",
+                        description=(
+                            f"Auto-detected by Infosys CIS Cloud Shield — Remediation Loop\n\n"
+                            f"Finding ID:      {finding['id']}\n"
+                            f"Type:            {finding['credential_type']}\n"
+                            f"Application:     {finding['application']}\n"
+                            f"Environment:     {finding['environment']}\n"
+                            f"Severity:        {finding['severity']}\n"
+                            f"Location:        {finding.get('file_location','')}\n"
+                            f"Detected:        {finding.get('detected_date','')}\n\n"
+                            f"INC Agent Analysis:\n{inc_output[:1000]}"
+                        ),
+                        urgency = 1 if finding["severity"] == "CRITICAL" else 2,
+                        impact  = 1 if finding["severity"] == "CRITICAL" else 2,
+                    )
+                    inc_number = snow_result.get("number", "SNOW-UNAVAIL")
+                    inc_url    = snow_result.get("url",    "")
+                    sys_id     = snow_result.get("sys_id", "")
+
+                    if snow_result.get("ok"):
+                        st.success(f"📋 Incident created: **{inc_number}**  →  [View in ServiceNow]({inc_url})")
+                    else:
+                        st.warning(f"ServiceNow: {snow_result.get('error','could not create incident')}")
+
+                    # ── PHASE 2: Dispatcher investigates ───────────────────────
+                    st.markdown("---")
+                    ph2 = st.empty()
+                    disp_output = stream_agent(
+                        oai, llm_model,
+                        DISPATCHER_INVESTIGATE_PROMPT,
+                        (f"INC Agent handed off incident **{inc_number}** to you.\n\n"
+                         f"INC Agent summary:\n{inc_output[:600]}\n\n"
+                         f"Original finding:\n{finding_ctx}"),
+                        "Dispatcher Agent",
+                        ph2,
+                    )
+
+                    # ── PHASE 3: Remediator executes fix ───────────────────────
+                    st.markdown("---")
+                    ph3 = st.empty()
+                    remed_output = stream_agent(
+                        oai, llm_model,
+                        REMEDIATOR_PROMPT,
+                        (f"Dispatcher Agent investigation for incident **{inc_number}**:\n{disp_output[:800]}\n\n"
+                         f"Finding:\n{finding_ctx}"),
+                        "Remediator Agent",
+                        ph3,
+                    )
+
+                    # ── PHASE 4: INC Agent closes ──────────────────────────────
+                    st.markdown("---")
+                    ph4 = st.empty()
+                    closure_output = stream_agent(
+                        oai, llm_model,
+                        INC_CLOSE_PROMPT,
+                        (f"Incident: **{inc_number}**\n\n"
+                         f"Dispatcher investigation:\n{disp_output[:500]}\n\n"
+                         f"Remediator resolution:\n{remed_output[:700]}"),
+                        "INC Agent (closure)",
+                        ph4,
+                    )
+
+                    # Update + resolve ServiceNow incident
+                    if sys_id:
+                        snow.update_incident(sys_id, {
+                            "state": "6",
+                            "close_code": "Solution provided",
+                            "close_notes": closure_output[:900],
+                            "work_notes": (
+                                f"Dispatcher Investigation:\n{disp_output[:500]}\n\n"
+                                f"Remediator Actions:\n{remed_output[:500]}"
+                            ),
+                        })
+                        st.success(f"✅ Incident **{inc_number}** resolved and closed in ServiceNow")
+
+                    summary_rows.append({
+                        "Finding":         finding["id"],
+                        "Severity":        finding["severity"],
+                        "Type":            finding["credential_type"],
+                        "Application":     finding["application"],
+                        "SNOW Ticket":     inc_number,
+                        "SNOW Link":       inc_url,
+                        "Status":          "✅ Resolved & Closed",
+                    })
+
+            overall_pb.progress(1.0, text="Remediation loop complete ✅")
+
+            st.divider()
+            st.subheader("📊 Remediation Loop Summary")
+            sumdf = pd.DataFrame(summary_rows)
+            st.dataframe(sumdf, use_container_width=True,
+                         column_config={"SNOW Link": st.column_config.LinkColumn("ServiceNow")})
+            resolved = sum(1 for r in summary_rows if "✅" in r["Status"])
+            st.metric("Incidents Resolved", f"{resolved}/{len(summary_rows)}")
