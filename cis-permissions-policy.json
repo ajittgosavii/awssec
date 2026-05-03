@@ -1,0 +1,66 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CredentialScanReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GenerateCredentialReport",
+        "iam:GetCredentialReport",
+        "iam:ListUsers",
+        "iam:ListAccessKeys",
+        "iam:GetAccessKeyLastUsed",
+        "iam:GetUser",
+        "iam:ListMFADevices",
+        "iam:ListVirtualMFADevices",
+        "iam:GetAccountSummary",
+        "iam:GetAccountPasswordPolicy",
+        "secretsmanager:ListSecrets",
+        "secretsmanager:DescribeSecret",
+        "securityhub:GetFindings",
+        "securityhub:ListFindingAggregators",
+        "securityhub:GetEnabledStandards"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "BackupScanReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "backup:ListBackupPlans",
+        "backup:ListBackupVaults",
+        "backup:DescribeBackupVault",
+        "backup:ListProtectedResources",
+        "backup:GetBackupVaultNotifications",
+        "backup:ListBackupJobs",
+        "backup:DescribeBackupJob",
+        "ec2:DescribeInstances",
+        "ec2:DescribeVolumes",
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketVersioning",
+        "s3:GetObjectLockConfiguration",
+        "s3:GetBucketReplication",
+        "dynamodb:ListTables",
+        "dynamodb:DescribeTable",
+        "dynamodb:DescribeContinuousBackups",
+        "efs:DescribeFileSystems",
+        "efs:DescribeBackupPolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "STSAndCloudTrail",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity",
+        "cloudtrail:LookupEvents",
+        "cloudwatch:DescribeAlarms",
+        "config:DescribeConfigRules",
+        "config:GetComplianceSummaryByConfigRule"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

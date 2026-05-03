@@ -1,0 +1,13 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowCurrentUser",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::448549863273:user/Ajit_Gosavi@infosys.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
