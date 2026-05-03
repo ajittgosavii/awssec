@@ -33,30 +33,38 @@ st.markdown("""
 [data-testid="stSidebar"] { background:#0d1117; }
 body, .stApp { background:#060d18; }
 
-/* ── login ── */
-.login-wrap {
-    padding:40px 32px 28px;
-    background:linear-gradient(160deg,#0d1b2a 0%,#091220 100%);
-    border:1px solid #1f3a5f; border-radius:20px;
-    box-shadow:0 0 60px rgba(0,170,255,0.15);
-    margin-top:60px; margin-bottom:16px;
+/* ── login animations ── */
+@keyframes spin-ring  { to { transform:rotate(360deg); } }
+@keyframes glow-pulse {
+    0%,100% { box-shadow:0 0 12px rgba(0,170,255,.45); }
+    50%     { box-shadow:0 0 28px rgba(0,170,255,.9),0 0 48px rgba(124,58,237,.45); }
 }
-.logo-ring {
-    width:90px;height:90px;border-radius:50%;margin:0 auto 18px;
-    background:linear-gradient(135deg,#00aaff,#0044cc,#7c3aed);
-    display:flex;align-items:center;justify-content:center;
-    font-size:38px;box-shadow:0 0 30px rgba(0,170,255,0.4);
+@keyframes float-up {
+    0%,100% { transform:translateY(0); }
+    50%     { transform:translateY(-5px); }
 }
-.app-title {
-    font-size:26px;font-weight:800;color:#fff;text-align:center;
-    letter-spacing:.5px;margin-bottom:4px;
+
+/* ── login card: style the centre column block as the card ── */
+div[data-testid="stHorizontalBlock"] > div:nth-child(2) > div > div[data-testid="stVerticalBlock"] {
+    background:linear-gradient(160deg,#0d1b2a 0%,#091220 100%) !important;
+    border:1px solid #1f3a5f !important;
+    border-radius:18px !important;
+    padding:28px 24px 20px !important;
+    box-shadow:0 0 55px rgba(0,170,255,.12) !important;
+    margin-top:7vh !important;
 }
-.app-sub {
-    font-size:13px;color:#6b8aad;text-align:center;margin-bottom:28px;
+
+/* ── match input fields to card theme ── */
+.stTextInput > div > div > input {
+    background:#070e1c !important;
+    border:1px solid #1f3a5f !important;
+    color:#e0e0e0 !important;
+    border-radius:8px !important;
+    font-size:13px !important;
 }
-.infosys-badge {
-    font-size:11px;color:#00aaff;text-align:center;
-    letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;
+.stTextInput > div > div > input:focus {
+    border-color:#00aaff !important;
+    box-shadow:0 0 0 2px rgba(0,170,255,.18) !important;
 }
 
 /* ── top header bar ── */
@@ -68,10 +76,17 @@ body, .stApp { background:#060d18; }
     margin-bottom:12px;
 }
 .topbar-logo {
-    width:44px;height:44px;border-radius:50%;
-    background:linear-gradient(135deg,#00aaff,#0044cc,#7c3aed);
-    display:flex;align-items:center;justify-content:center;font-size:20px;
-    box-shadow:0 0 16px rgba(0,170,255,0.35);flex-shrink:0;
+    position:relative;width:40px;height:40px;flex-shrink:0;
+}
+.topbar-logo-ring {
+    position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(from 0deg,#00aaff,#7c3aed,#0044cc,#00ff88,#00aaff);
+    animation:spin-ring 4s linear infinite;
+}
+.topbar-logo-inner {
+    position:absolute;inset:2px;border-radius:50%;
+    background:#0d1b2a;
+    display:flex;align-items:center;justify-content:center;font-size:17px;
 }
 .topbar-name { font-size:20px;font-weight:800;color:#fff; }
 .topbar-tag  { font-size:12px;color:#6b8aad; }
@@ -100,19 +115,40 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 if not st.session_state.authenticated:
-    # Single narrow column holds both the card and the form inputs
-    _, mid, _ = st.columns([3, 2, 3])
+    _, mid, _ = st.columns([3.5, 2, 3.5])
     with mid:
+        # ── Animated logo + brand (all inside the same column = same card) ──
         st.markdown("""
-        <div class="login-wrap">
-          <div class="logo-ring">🛡️</div>
-          <div class="infosys-badge">Infosys · Cloud Infrastructure Services</div>
-          <div class="app-title">CIS Cloud Shield</div>
-          <div class="app-sub">Agentic AI · AWS Security · Immutable Backup</div>
+        <div style="text-align:center;padding-bottom:18px;animation:float-up 4s ease-in-out infinite">
+          <!-- Spinning conic-gradient ring with static emoji centre -->
+          <div style="position:relative;width:58px;height:58px;margin:0 auto 12px">
+            <div style="position:absolute;inset:0;border-radius:50%;
+                        background:conic-gradient(from 0deg,#00aaff,#7c3aed,#0044cc,#00ff88,#00aaff);
+                        animation:spin-ring 3s linear infinite,glow-pulse 2s ease-in-out infinite;">
+            </div>
+            <div style="position:absolute;inset:3px;border-radius:50%;
+                        background:#091220;
+                        display:flex;align-items:center;justify-content:center;font-size:22px;">
+              🛡️
+            </div>
+          </div>
+          <div style="font-size:9px;color:#00aaff;letter-spacing:2.5px;
+                      text-transform:uppercase;margin-bottom:6px;">
+            Infosys · Cloud Infrastructure Services
+          </div>
+          <div style="font-size:18px;font-weight:800;color:#fff;
+                      letter-spacing:.5px;margin-bottom:3px;">
+            CIS Cloud Shield
+          </div>
+          <div style="font-size:11px;color:#6b8aad;margin-bottom:4px;">
+            Agentic AI · AWS Security · Immutable Backup
+          </div>
         </div>
+        <hr style="border:none;border-top:1px solid #1f3a5f;margin:0 0 14px">
         """, unsafe_allow_html=True)
-        username = st.text_input("Username", placeholder="Enter username", label_visibility="collapsed")
-        password = st.text_input("Password", type="password", placeholder="Enter password", label_visibility="collapsed")
+
+        username = st.text_input("Username", placeholder="Username", label_visibility="collapsed")
+        password = st.text_input("Password", type="password", placeholder="Password", label_visibility="collapsed")
         if st.button("🔐  Sign In", type="primary", use_container_width=True):
             if username == "admin" and password == "Infosys@123":
                 st.session_state.authenticated = True
@@ -120,13 +156,20 @@ if not st.session_state.authenticated:
                 st.rerun()
             else:
                 st.error("Invalid credentials. Use admin / Infosys@123")
-        st.caption("🔒 Protected by Infosys CIS · TLS encrypted · Session-scoped access")
+        st.markdown(
+            "<p style='text-align:center;font-size:10px;color:#3a5070;margin-top:10px'>"
+            "🔒 Protected by Infosys CIS · TLS encrypted · Session-scoped</p>",
+            unsafe_allow_html=True,
+        )
     st.stop()
 
 # ── App header (shown only when authenticated) ────────────────────────────────
 st.markdown(f"""
 <div class="topbar">
-  <div class="topbar-logo">🛡️</div>
+  <div class="topbar-logo">
+    <div class="topbar-logo-ring"></div>
+    <div class="topbar-logo-inner">🛡️</div>
+  </div>
   <div>
     <div class="topbar-name">Infosys &nbsp;<span style="color:#00aaff">{APP_NAME}</span></div>
     <div class="topbar-tag">{APP_TAGLINE}</div>
