@@ -569,6 +569,22 @@ with st.sidebar:
                 st.session_state.aws_arn        = result["arn"]
                 st.success(f"✅ Connected\n**Account:** {result['account_id']}")
                 st.caption(result["arn"])
+                # Auto-run live IAM scan immediately on connect so real data
+                # is available to the agents and findings table right away.
+                with st.spinner("🔍 Auto-scanning live IAM findings…"):
+                    try:
+                        _live_client = _make_aws_client()
+                        _live_findings = _live_client.get_iam_findings()
+                        st.session_state.live_iam = _live_findings
+                        _crit_live = sum(1 for f in _live_findings if f["severity"] == "CRITICAL")
+                        _high_live = sum(1 for f in _live_findings if f["severity"] == "HIGH")
+                        st.info(
+                            f"🔴 **{_crit_live} CRITICAL** · 🟠 **{_high_live} HIGH** "
+                            f"real IAM findings loaded from account {result['account_id']}. "
+                            "Agents will use live data."
+                        )
+                    except Exception as _e:
+                        st.warning(f"Live scan failed: {_e} — falling back to mock data.")
             else:
                 _err = result["error"]
                 if "No AWS credentials" in _err or "NoCredentialError" in _err or "Unable to locate" in _err:
@@ -616,13 +632,34 @@ with tab1:
     st.title("🔐 AWS Credential Intelligence")
     st.markdown("*4-agent AI system — detection → risk assessment → remediation → prevention*")
 
+    # ── Choose active dataset: live IAM scan (real) or mock ──────────────────
+    _has_live = bool(st.session_state.get("live_iam"))
+    if _has_live:
+        _active_df = pd.DataFrame(st.session_state.live_iam)
+        st.success(
+            f"🟢 **Live AWS data active** — {len(_active_df)} real IAM findings from "
+            f"account {st.session_state.get('aws_account_id', '')}. "
+            "Agents will analyse your actual account."
+        )
+        _data_label = f"Live AWS ({len(_active_df)} findings)"
+    else:
+        _active_df = findings_df.copy()
+        if st.session_state.aws_connected:
+            st.warning("AWS connected but live scan not yet complete — showing mock data. Scroll down to run Live IAM Scan.")
+        _data_label = "Mock data (1,200 synthetic findings)"
+
     # ── KPI row ──────────────────────────────────────────────────────────────
+    _tcrit = int((_active_df.severity == "CRITICAL").sum())
+    _thigh = int((_active_df.severity == "HIGH").sum())
+    _tmed  = int((_active_df.severity == "MEDIUM").sum())
+    _tapps = int(_active_df.application.nunique()) if "application" in _active_df.columns else 0
+
     k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("Total Findings",      "1,200")
-    k2.metric("Critical",            crit,  delta="Rotate Now")
-    k3.metric("High",                high,  delta="72-hr SLA")
-    k4.metric("Medium",              len(findings_df[findings_df.severity == "MEDIUM"]))
-    k5.metric("Apps Affected",       int(findings_df.application.nunique()))
+    k1.metric("Total Findings", len(_active_df), help=_data_label)
+    k2.metric("Critical",       _tcrit,  delta="Rotate Now")
+    k3.metric("High",           _thigh,  delta="72-hr SLA")
+    k4.metric("Medium",         _tmed)
+    k5.metric("Apps Affected",  _tapps)
     st.divider()
 
     # ── Agent orchestration panel ─────────────────────────────────────────────
@@ -663,18 +700,23 @@ with tab1:
         else:
             client = openai.OpenAI(api_key=openai_key)
 
-            # Build context payload
-            by_sev = findings_df.severity.value_counts().to_dict()
-            by_type = findings_df.credential_type.value_counts().head(6).to_dict()
-            top_apps = findings_df.groupby("application").size().sort_values(ascending=False).head(5).to_dict()
-            sample_critical = findings_df[findings_df.severity == "CRITICAL"].head(5).to_dict("records")
+            # Build context payload — prefer live data when available
+            _ctx_df = pd.DataFrame(st.session_state.live_iam) if st.session_state.get("live_iam") else findings_df
+            _is_live_ctx = bool(st.session_state.get("live_iam"))
+            _data_source_label = f"LIVE AWS account {st.session_state.get('aws_account_id','')}" if _is_live_ctx else "mock demo dataset"
+
+            by_sev   = _ctx_df.severity.value_counts().to_dict()
+            by_type  = _ctx_df.credential_type.value_counts().head(6).to_dict() if "credential_type" in _ctx_df.columns else {}
+            top_apps = _ctx_df.groupby("application").size().sort_values(ascending=False).head(5).to_dict() if "application" in _ctx_df.columns else {}
+            sample_critical = _ctx_df[_ctx_df.severity == "CRITICAL"].head(5).to_dict("records")
 
             env_ctx = json.dumps({
-                "total_findings": 1200,
-                "by_severity": by_sev,
-                "top_credential_types": by_type,
-                "most_exposed_apps": top_apps,
-                "apps_affected": int(findings_df.application.nunique()),
+                "data_source":             _data_source_label,
+                "total_findings":          len(_ctx_df),
+                "by_severity":             by_sev,
+                "top_credential_types":    by_type,
+                "most_exposed_users_apps": top_apps,
+                "apps_affected":           int(_ctx_df.application.nunique()) if "application" in _ctx_df.columns else 0,
                 "sample_critical_findings": sample_critical,
             }, indent=2)
 
@@ -703,8 +745,8 @@ with tab1:
                         "Be quantitative. Use markdown. Max 450 words."
                     ),
                     "user": (
-                        "Based on the Scanner Agent's analysis of 1,200 hardcoded credentials "
-                        f"({crit} CRITICAL, {high} HIGH) across {int(findings_df.application.nunique())} apps:\n\n"
+                        f"Based on the Scanner Agent's analysis of {len(_ctx_df)} credential findings "
+                        f"({_tcrit} CRITICAL, {_thigh} HIGH) from {_data_source_label}:\n\n"
                         "Produce:\n"
                         "1. **Risk Score** — 0-100 with weighted formula breakdown\n"
                         "2. **Compliance Gap Matrix** — PCI-DSS §3.4, SOC2 CC6.3, CIS AWS Benchmark 1.21\n"
@@ -792,28 +834,40 @@ with tab1:
     st.divider()
 
     # ── Findings table ────────────────────────────────────────────────────────
-    st.subheader("📋 Credential Findings")
-    col1, col2, col3 = st.columns(3)
-    sev_f  = col1.multiselect("Severity",        ["CRITICAL", "HIGH", "MEDIUM", "LOW"],  default=["CRITICAL", "HIGH"])
-    env_f  = col2.multiselect("Environment",     sorted(findings_df.environment.unique()))
-    type_f = col3.multiselect("Credential Type", sorted(findings_df.credential_type.unique()))
+    # badge showing data source
+    _src_badge = "🟢 Live AWS Data" if _has_live else "🟡 Mock Demo Data"
+    st.subheader(f"📋 Credential Findings  —  {_src_badge}")
+    if not _has_live:
+        st.caption("Connect to AWS in the sidebar to load real findings from your account.")
 
-    filt = findings_df.copy()
+    col1, col2, col3 = st.columns(3)
+    _sev_opts  = sorted(_active_df.severity.dropna().unique().tolist()) if "severity" in _active_df.columns else ["CRITICAL","HIGH","MEDIUM","LOW"]
+    _env_opts  = sorted(_active_df.environment.dropna().unique().tolist()) if "environment" in _active_df.columns else []
+    _type_opts = sorted(_active_df.credential_type.dropna().unique().tolist()) if "credential_type" in _active_df.columns else []
+
+    sev_f  = col1.multiselect("Severity",        _sev_opts,  default=[s for s in ["CRITICAL","HIGH"] if s in _sev_opts])
+    env_f  = col2.multiselect("Environment",     _env_opts)
+    type_f = col3.multiselect("Credential Type", _type_opts)
+
+    filt = _active_df.copy()
     if sev_f:   filt = filt[filt.severity.isin(sev_f)]
     if env_f:   filt = filt[filt.environment.isin(env_f)]
     if type_f:  filt = filt[filt.credential_type.isin(type_f)]
 
+    # Show whichever columns exist (live data has fewer columns than mock)
+    _show_cols = [c for c in ["id","application","environment","credential_type","severity",
+                               "file_location","line_number","status","commit_author","detected_date"]
+                  if c in filt.columns]
     st.dataframe(
-        filt[["id", "application", "environment", "credential_type", "severity",
-              "file_location", "line_number", "status", "commit_author", "detected_date"]].head(60),
+        filt[_show_cols].head(60),
         use_container_width=True,
         column_config={
-            "id":             "Finding ID",
-            "severity":       st.column_config.SelectboxColumn("Severity", options=["CRITICAL", "HIGH", "MEDIUM", "LOW"]),
-            "detected_date":  "Detected",
+            "id":            "Finding ID",
+            "severity":      st.column_config.SelectboxColumn("Severity", options=["CRITICAL","HIGH","MEDIUM","LOW"]),
+            "detected_date": "Detected",
         },
     )
-    st.caption(f"Showing {min(60, len(filt))} of {len(filt)} filtered findings")
+    st.caption(f"Showing {min(60, len(filt))} of {len(filt)} filtered findings · Source: {_data_label}")
 
     # ── ServiceNow for credentials ────────────────────────────────────────────
     st.divider()
@@ -824,10 +878,12 @@ with tab1:
             st.error("Configure ServiceNow in the sidebar.")
         else:
             snow = ServiceNowClient(snow_url, snow_user, snow_pass)
-            critical_open = findings_df[
-                (findings_df.severity == "CRITICAL") &
-                (findings_df.status.isin(["Open", "In Progress"])) &
-                (~findings_df.id.isin(st.session_state.cred_tickets))
+            _chg_df = _active_df.copy()
+            _status_col = "status" if "status" in _chg_df.columns else None
+            critical_open = _chg_df[
+                (_chg_df.severity == "CRITICAL") &
+                (_chg_df.id.apply(lambda x: x not in st.session_state.cred_tickets)) &
+                (_chg_df[_status_col].isin(["Open","In Progress"]) if _status_col else True)
             ].head(cr_limit)
 
             cr_pb   = st.progress(0)
