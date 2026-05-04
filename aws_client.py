@@ -30,19 +30,29 @@ def _age_days(value) -> int:
 class AWSIntelligenceClient:
 
     def __init__(self, role_arn: str = "", external_id: str = "",
-                 region: str = "us-east-1", auth_method: str = "env"):
+                 region: str = "us-east-1", auth_method: str = "env",
+                 bootstrap_key: str = "", bootstrap_secret: str = ""):
         """
-        auth_method="role"  → STS AssumeRole using role_arn (+ optional external_id)
+        auth_method="role"  → STS AssumeRole using role_arn.
+                              bootstrap_key/secret are used ONLY to call sts:AssumeRole —
+                              they need just the single permission sts:AssumeRole on role_arn.
+                              All subsequent AWS calls use the short-lived role credentials.
         auth_method="env"   → boto3 credential chain: env vars, instance profile,
-                              ECS task role, SSO — nothing entered in the UI
+                              ECS task role, SSO — nothing entered in the UI.
         """
         self.region = region
         self.account_id: str = ""
 
         if auth_method == "role" and role_arn:
-            # Assume the IAM role; the caller identity of the host/env is used
-            # to make the sts:AssumeRole call, so no long-lived keys are needed.
-            sts_client = boto3.client("sts", region_name=region)
+            # Build STS client — use bootstrap credentials when provided (required on
+            # Streamlit Cloud which has no ambient credentials), otherwise fall back
+            # to whatever boto3 finds (instance profile, env vars, SSO).
+            sts_kwargs: dict = {"region_name": region}
+            if bootstrap_key and bootstrap_secret:
+                sts_kwargs["aws_access_key_id"]     = bootstrap_key
+                sts_kwargs["aws_secret_access_key"] = bootstrap_secret
+
+            sts_client = boto3.client("sts", **sts_kwargs)
             assume_kwargs: dict = {
                 "RoleArn":         role_arn,
                 "RoleSessionName": "CISCloudShieldSession",
@@ -50,6 +60,7 @@ class AWSIntelligenceClient:
             }
             if external_id:
                 assume_kwargs["ExternalId"] = external_id
+
             resp  = sts_client.assume_role(**assume_kwargs)
             creds = resp["Credentials"]
             self._session = boto3.Session(

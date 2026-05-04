@@ -423,17 +423,24 @@ _oai_from_secrets   = _secrets.get("OPENAI_API_KEY",  "")
 _snow_url_default   = _secrets.get("SNOW_URL",         "https://dev218436.service-now.com")
 _snow_user_default  = _secrets.get("SNOW_USER",        "admin")
 _snow_pass_default  = _secrets.get("SNOW_PASS",        "")
-_aws_role_default   = _secrets.get("AWS_ROLE_ARN",       "")
-_aws_ext_id_default = _secrets.get("AWS_EXTERNAL_ID",    "")
-_aws_region_default = _secrets.get("AWS_DEFAULT_REGION", "us-east-1")
+_aws_role_default      = _secrets.get("AWS_ROLE_ARN",          "")
+_aws_ext_id_default    = _secrets.get("AWS_EXTERNAL_ID",       "")
+_aws_region_default    = _secrets.get("AWS_DEFAULT_REGION",    "us-east-1")
+# Bootstrap credentials — used ONLY to call sts:AssumeRole on Streamlit Cloud.
+# The bootstrap user (CISCloudShieldBootstrap) has a single permission: sts:AssumeRole
+# on CISCloudShieldRole. All real AWS calls use the resulting temporary credentials.
+_aws_bootstrap_key     = _secrets.get("AWS_ACCESS_KEY_ID",     "")
+_aws_bootstrap_secret  = _secrets.get("AWS_SECRET_ACCESS_KEY", "")
 
 def _make_aws_client() -> AWSIntelligenceClient:
     c = st.session_state.aws_creds
     return AWSIntelligenceClient(
-        role_arn    = c.get("role_arn",    ""),
-        external_id = c.get("external_id", ""),
-        region      = c.get("region",      "us-east-1"),
-        auth_method = c.get("auth_method", "env"),
+        role_arn        = c.get("role_arn",         ""),
+        external_id     = c.get("external_id",      ""),
+        region          = c.get("region",           "us-east-1"),
+        auth_method     = c.get("auth_method",      "env"),
+        bootstrap_key   = c.get("bootstrap_key",    ""),
+        bootstrap_secret= c.get("bootstrap_secret", ""),
     )
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -492,9 +499,38 @@ with st.sidebar:
             "External ID  *(optional)*", value=_aws_ext_id_default,
             placeholder="CISCloudShield-ExternalId",
         )
+
+        # Bootstrap credentials — needed on Streamlit Cloud (no instance profile)
+        if _aws_bootstrap_key and _aws_bootstrap_secret:
+            st.success("Bootstrap credentials loaded from secrets ✓")
+            aws_bootstrap_key    = _aws_bootstrap_key
+            aws_bootstrap_secret = _aws_bootstrap_secret
+        else:
+            st.markdown(
+                "<p style='font-size:11px;color:rgba(255,255,255,.45);margin:8px 0 2px;'>"
+                "Bootstrap Credentials "
+                "<span style='color:#f5a623;'>⚠ required on Streamlit Cloud</span></p>",
+                unsafe_allow_html=True,
+            )
+            aws_bootstrap_key = st.text_input(
+                "Access Key ID", value="", type="password",
+                placeholder="AKIA... (sts:AssumeRole only)",
+                key="bk_key",
+            )
+            aws_bootstrap_secret = st.text_input(
+                "Secret Access Key", value="", type="password",
+                placeholder="bootstrap secret",
+                key="bk_secret",
+            )
+            st.caption(
+                "Use the CISCloudShieldBootstrap IAM user key — "
+                "it has only `sts:AssumeRole` permission."
+            )
     else:
-        aws_role_arn = ""
-        aws_ext_id   = ""
+        aws_role_arn         = ""
+        aws_ext_id           = ""
+        aws_bootstrap_key    = ""
+        aws_bootstrap_secret = ""
         st.warning(
             "**Only works on AWS infrastructure.**\n\n"
             "This mode requires the app to run on EC2, ECS Fargate, or Lambda "
@@ -510,12 +546,19 @@ with st.sidebar:
     if st.button("🔌 Connect to AWS", use_container_width=True):
         if _use_role and not aws_role_arn:
             st.warning("Enter a Role ARN — e.g. arn:aws:iam::448549863273:role/CISCloudShieldRole")
+        elif _use_role and not aws_bootstrap_key:
+            st.warning(
+                "Enter Bootstrap Access Key ID — or add `AWS_ACCESS_KEY_ID` "
+                "to Streamlit secrets. Use the **CISCloudShieldBootstrap** IAM user key."
+            )
         else:
             st.session_state.aws_creds = {
-                "role_arn":    aws_role_arn,
-                "external_id": aws_ext_id,
-                "region":      aws_region,
-                "auth_method": "role" if _use_role else "env",
+                "role_arn":         aws_role_arn,
+                "external_id":      aws_ext_id,
+                "region":           aws_region,
+                "auth_method":      "role" if _use_role else "env",
+                "bootstrap_key":    aws_bootstrap_key,
+                "bootstrap_secret": aws_bootstrap_secret,
             }
             _spinner_msg = "Assuming role and verifying identity…" if _use_role else "Verifying identity via instance profile…"
             with st.spinner(_spinner_msg):
