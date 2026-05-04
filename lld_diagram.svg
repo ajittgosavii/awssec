@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Segoe UI,Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#04091a"/><stop offset="100%" stop-color="#020610"/>
+    </linearGradient>
+    <linearGradient id="hdr2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#003D9C"/><stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#00aaff"/>
+    </marker>
+    <marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#00c896"/>
+    </marker>
+    <marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f5a623"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#bg2)"/>
+  <rect x="0" y="0" width="1200" height="54" fill="url(#hdr2)"/>
+  <text x="20" y="22" font-size="17" font-weight="700" fill="white">Infosys CIS Cloud Shield — Low Level Design (LLD)</text>
+  <text x="20" y="42" font-size="10" fill="rgba(255,255,255,0.6)">Component interactions, data flows, API contracts, and IAM authentication chain</text>
+  <text x="1185" y="32" text-anchor="end" font-size="9" fill="rgba(255,255,255,0.35)">v1.0 · 2026</text>
+
+  <!-- ── COLUMN 1: Frontend ── -->
+  <rect x="16" y="66" width="190" height="680" rx="10" fill="rgba(0,40,100,0.15)" stroke="rgba(0,170,255,0.2)" stroke-width="1"/>
+  <rect x="16" y="66" width="190" height="28" rx="10" fill="rgba(0,100,200,0.3)"/>
+  <text x="111" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#8ecfff">FRONTEND</text>
+
+  <!-- Boxes inside Frontend -->
+  <rect x="26" y="104" width="170" height="52" rx="6" fill="rgba(0,60,140,0.4)" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+  <text x="111" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">Streamlit App (app.py)</text>
+  <text x="111" y="138" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">st.tabs · session_state · st.secrets</text>
+  <text x="111" y="150" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">st.set_page_config · layout=wide</text>
+
+  <rect x="26" y="166" width="170" height="44" rx="6" fill="rgba(0,60,140,0.3)" stroke="rgba(0,170,255,0.2)" stroke-width="1"/>
+  <text x="111" y="183" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">Login Gate</text>
+  <text x="111" y="197" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">st.session_state.authenticated</text>
+  <text x="111" y="209" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">admin / Infosys@123</text>
+
+  <rect x="26" y="220" width="170" height="44" rx="6" fill="rgba(0,60,140,0.3)" stroke="rgba(0,170,255,0.2)" stroke-width="1"/>
+  <text x="111" y="237" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">CSS Glass Theme</text>
+  <text x="111" y="251" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">backdrop-filter · conic-gradient</text>
+  <text x="111" y="263" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Inter font · topbar HTML</text>
+
+  <rect x="26" y="274" width="170" height="44" rx="6" fill="rgba(0,60,140,0.3)" stroke="rgba(0,170,255,0.2)" stroke-width="1"/>
+  <text x="111" y="291" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">Mock Data (mock_data.py)</text>
+  <text x="111" y="305" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">1,200 findings · 250 apps</text>
+  <text x="111" y="317" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">seed=42 · deterministic</text>
+
+  <rect x="26" y="328" width="170" height="44" rx="6" fill="rgba(0,60,140,0.3)" stroke="rgba(0,170,255,0.2)" stroke-width="1"/>
+  <text x="111" y="345" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">Plotly Charts</text>
+  <text x="111" y="359" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Bar · Donut · Scatter</text>
+  <text x="111" y="371" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">plotly.express / graph_objects</text>
+
+  <rect x="26" y="382" width="170" height="44" rx="6" fill="rgba(0,60,140,0.3)" stroke="rgba(0,170,255,0.2)" stroke-width="1"/>
+  <text x="111" y="399" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">User Guide Tab</text>
+  <text x="111" y="413" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Embedded HTML cards</text>
+  <text x="111" y="425" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">st.expander FAQ sections</text>
+
+  <!-- ── COLUMN 2: AI Layer ── -->
+  <rect x="222" y="66" width="200" height="680" rx="10" fill="rgba(60,20,120,0.15)" stroke="rgba(124,58,237,0.25)" stroke-width="1"/>
+  <rect x="222" y="66" width="200" height="28" rx="10" fill="rgba(124,58,237,0.3)"/>
+  <text x="322" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd">AI ORCHESTRATION</text>
+
+  <rect x="232" y="104" width="180" height="52" rx="6" fill="rgba(80,30,160,0.4)" stroke="rgba(124,58,237,0.4)" stroke-width="1"/>
+  <text x="322" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd">Claude Opus 4.7 / GPT-4o</text>
+  <text x="322" y="138" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">openai.OpenAI(api_key=...)</text>
+  <text x="322" y="150" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">stream=True · temp=0.1</text>
+
+  <rect x="232" y="166" width="180" height="52" rx="6" fill="rgba(80,30,160,0.3)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+  <text x="322" y="184" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd">Scanner Agent</text>
+  <text x="322" y="200" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Catalogues 1,200 findings</text>
+  <text x="322" y="212" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">system: scanner role prompt</text>
+
+  <rect x="232" y="228" width="180" height="52" rx="6" fill="rgba(80,30,160,0.3)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+  <text x="322" y="246" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd">Risk Analyst Agent</text>
+  <text x="322" y="262" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">PCI-DSS / SOC2 mapping</text>
+  <text x="322" y="274" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">ctx: Scanner output[:800]</text>
+
+  <rect x="232" y="290" width="180" height="52" rx="6" fill="rgba(80,30,160,0.3)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+  <text x="322" y="308" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd">Remediator Agent</text>
+  <text x="322" y="324" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Secrets Mgr migration plan</text>
+  <text x="322" y="336" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">ctx: Risk output[:800]</text>
+
+  <rect x="232" y="352" width="180" height="52" rx="6" fill="rgba(80,30,160,0.3)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+  <text x="322" y="370" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd">Prevention Agent</text>
+  <text x="322" y="386" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">SCP · pre-commit hooks</text>
+  <text x="322" y="398" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">ctx: Remediator output[:800]</text>
+
+  <rect x="232" y="414" width="180" height="52" rx="6" fill="rgba(80,30,160,0.3)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+  <text x="322" y="432" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd">Auto-Remediation Loop</text>
+  <text x="322" y="448" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">INC → Dispatcher</text>
+  <text x="322" y="460" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">→ Remediator → Close</text>
+
+  <!-- ── COLUMN 3: AWS Layer ── -->
+  <rect x="438" y="66" width="210" height="680" rx="10" fill="rgba(80,50,0,0.15)" stroke="rgba(245,166,35,0.25)" stroke-width="1"/>
+  <rect x="438" y="66" width="210" height="28" rx="10" fill="rgba(245,166,35,0.25)"/>
+  <text x="543" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#f5a623">AWS LAYER</text>
+
+  <rect x="448" y="104" width="190" height="52" rx="6" fill="rgba(100,65,0,0.4)" stroke="rgba(245,166,35,0.4)" stroke-width="1"/>
+  <text x="543" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">IAM Auth Chain</text>
+  <text x="543" y="138" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Bootstrap (AKIAWQ35...) →</text>
+  <text x="543" y="150" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">sts:AssumeRole → temp creds (1h)</text>
+
+  <rect x="448" y="166" width="190" height="44" rx="6" fill="rgba(100,65,0,0.3)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+  <text x="543" y="183" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">IAM Credential Report</text>
+  <text x="543" y="197" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">iam:GenerateCredentialReport</text>
+  <text x="543" y="209" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Root keys · MFA · stale keys</text>
+
+  <rect x="448" y="220" width="190" height="44" rx="6" fill="rgba(100,65,0,0.3)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+  <text x="543" y="237" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">Secrets Manager</text>
+  <text x="543" y="251" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">secretsmanager:ListSecrets</text>
+  <text x="543" y="263" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Rotation status · ARN listing</text>
+
+  <rect x="448" y="274" width="190" height="44" rx="6" fill="rgba(100,65,0,0.3)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+  <text x="543" y="291" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">Security Hub</text>
+  <text x="543" y="305" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">securityhub:GetFindings</text>
+  <text x="543" y="317" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">CIS Benchmark FAILED controls</text>
+
+  <rect x="448" y="328" width="190" height="44" rx="6" fill="rgba(100,65,0,0.3)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+  <text x="543" y="345" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">AWS Backup</text>
+  <text x="543" y="359" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">backup:ListBackupVaults</text>
+  <text x="543" y="371" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Vault Lock · WORM · recovery pts</text>
+
+  <rect x="448" y="382" width="190" height="44" rx="6" fill="rgba(100,65,0,0.3)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+  <text x="543" y="399" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">EC2 · RDS · S3 · DynamoDB</text>
+  <text x="543" y="413" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Describe APIs · Object Lock</text>
+  <text x="543" y="425" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">PITR status · versioning</text>
+
+  <rect x="448" y="436" width="190" height="44" rx="6" fill="rgba(100,65,0,0.3)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+  <text x="543" y="453" text-anchor="middle" font-size="10" font-weight="600" fill="#f5a623">aws_client.py</text>
+  <text x="543" y="467" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">AWSIntelligenceClient class</text>
+  <text x="543" y="479" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">boto3.Session · paginator</text>
+
+  <!-- ── COLUMN 4: ServiceNow Layer ── -->
+  <rect x="664" y="66" width="210" height="680" rx="10" fill="rgba(0,50,100,0.15)" stroke="rgba(0,170,255,0.25)" stroke-width="1"/>
+  <rect x="664" y="66" width="210" height="28" rx="10" fill="rgba(0,120,200,0.3)"/>
+  <text x="769" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#8ecfff">SERVICENOW LAYER</text>
+
+  <rect x="674" y="104" width="190" height="52" rx="6" fill="rgba(0,60,130,0.4)" stroke="rgba(0,170,255,0.4)" stroke-width="1"/>
+  <text x="769" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">servicenow.py</text>
+  <text x="769" y="138" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">ServiceNowClient class</text>
+  <text x="769" y="150" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">HTTPBasicAuth · requests</text>
+
+  <rect x="674" y="166" width="190" height="44" rx="6" fill="rgba(0,60,130,0.3)" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+  <text x="769" y="183" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">SNOW_USER_MAP</text>
+  <text x="769" y="197" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">10 users · sys_id lookup</text>
+  <text x="769" y="209" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">commit_author → assigned_to</text>
+
+  <rect x="674" y="220" width="190" height="44" rx="6" fill="rgba(0,60,130,0.3)" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+  <text x="769" y="237" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">create_incident()</text>
+  <text x="769" y="251" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">POST /api/now/table/incident</text>
+  <text x="769" y="263" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">severity → urgency/impact auto</text>
+
+  <rect x="674" y="274" width="190" height="44" rx="6" fill="rgba(0,60,130,0.3)" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+  <text x="769" y="291" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">create_change_request()</text>
+  <text x="769" y="305" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">POST /api/now/table/change_request</text>
+  <text x="769" y="317" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Emergency / Normal type</text>
+
+  <rect x="674" y="328" width="190" height="44" rx="6" fill="rgba(0,60,130,0.3)" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+  <text x="769" y="345" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">update_incident()</text>
+  <text x="769" y="359" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">PATCH /api/now/table/incident/</text>
+  <text x="769" y="371" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">state=6 to close</text>
+
+  <rect x="674" y="382" width="190" height="44" rx="6" fill="rgba(0,60,130,0.3)" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+  <text x="769" y="399" text-anchor="middle" font-size="10" font-weight="600" fill="#8ecfff">10 Real Users</text>
+  <text x="769" y="413" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">jane.smith · grace.lee · john.doe</text>
+  <text x="769" y="425" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">bob.wilson · alice.jones + 5 more</text>
+
+  <!-- ── COLUMN 5: Deployment ── -->
+  <rect x="890" y="66" width="294" height="680" rx="10" fill="rgba(0,80,40,0.15)" stroke="rgba(0,200,150,0.25)" stroke-width="1"/>
+  <rect x="890" y="66" width="294" height="28" rx="10" fill="rgba(0,160,100,0.25)"/>
+  <text x="1037" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#6ee7b7">DEPLOYMENT &amp; SECRETS</text>
+
+  <rect x="900" y="104" width="274" height="80" rx="6" fill="rgba(0,60,35,0.4)" stroke="rgba(0,200,150,0.4)" stroke-width="1"/>
+  <text x="1037" y="122" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee7b7">Streamlit Secrets (.streamlit/secrets.toml)</text>
+  <text x="900" y="142" font-size="8.5" fill="rgba(255,255,255,0.55)">   OPENAI_API_KEY     = sk-...</text>
+  <text x="900" y="156" font-size="8.5" fill="rgba(255,255,255,0.55)">   AWS_ROLE_ARN       = arn:aws:iam::448549863273:role/CISCloudShieldRole</text>
+  <text x="900" y="170" font-size="8.5" fill="rgba(255,255,255,0.55)">   AWS_ACCESS_KEY_ID  = AKIAWQ35HX5UTGMEE5C3  (bootstrap only)</text>
+
+  <rect x="900" y="196" width="274" height="52" rx="6" fill="rgba(0,60,35,0.3)" stroke="rgba(0,200,150,0.3)" stroke-width="1"/>
+  <text x="1037" y="214" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee7b7">IAM Auth Flow</text>
+  <text x="1037" y="230" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">Bootstrap key → STS:AssumeRole</text>
+  <text x="1037" y="242" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">→ Temp creds (1h) → All AWS calls</text>
+
+  <rect x="900" y="258" width="274" height="52" rx="6" fill="rgba(0,60,35,0.3)" stroke="rgba(0,200,150,0.3)" stroke-width="1"/>
+  <text x="1037" y="276" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee7b7">GitHub Repo</text>
+  <text x="1037" y="292" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">github.com/ajittgosavii/awssec</text>
+  <text x="1037" y="304" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">main branch · auto-deploy on push</text>
+
+  <rect x="900" y="320" width="274" height="52" rx="6" fill="rgba(0,60,35,0.3)" stroke="rgba(0,200,150,0.3)" stroke-width="1"/>
+  <text x="1037" y="338" text-anchor="middle" font-size="10" font-weight="600" fill="#6ee7b7">requirements.txt</text>
+  <text x="1037" y="354" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">streamlit · openai · boto3 · botocore</text>
+  <text x="1037" y="366" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.5)">pandas · plotly · requests</text>
+
+  <!-- Cross-layer arrows -->
+  <line x1="206" y1="180" x2="222" y2="192" stroke="#7c3aed" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#a1)"/>
+  <line x1="412" y1="250" x2="438" y2="250" stroke="#f5a623" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#a3)"/>
+  <line x1="412" y1="370" x2="664" y2="230" stroke="#00aaff" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#a1)"/>
+  <line x1="648" y1="200" x2="664" y2="200" stroke="#00aaff" stroke-width="1.3" stroke-dasharray="4,2" marker-end="url(#a1)"/>
+
+  <!-- Footer -->
+  <rect x="0" y="778" width="1200" height="22" fill="rgba(0,61,156,0.4)"/>
+  <text x="600" y="793" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">Infosys Limited · CIS Cloud Shield · LLD · Confidential · v1.0 · 2026</text>
+</svg>

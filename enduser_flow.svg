@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1080" width="900" height="1080" font-family="Segoe UI,Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#04091a"/><stop offset="100%" stop-color="#020610"/>
+    </linearGradient>
+    <linearGradient id="hdr3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#003D9C"/><stop offset="100%" stop-color="#0066cc"/>
+    </linearGradient>
+    <marker id="af" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#00aaff"/>
+    </marker>
+    <marker id="afg" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#00c896"/>
+    </marker>
+    <marker id="afy" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f5a623"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="1080" fill="url(#bg3)"/>
+  <rect x="0" y="0" width="900" height="54" fill="url(#hdr3)"/>
+  <text x="450" y="22" text-anchor="middle" font-size="17" font-weight="700" fill="white">Infosys CIS Cloud Shield — End User Flow</text>
+  <text x="450" y="42" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.6)">Step-by-step journey from login to closed ServiceNow ticket</text>
+
+  <!-- Step helper: each step is a rounded box with number badge -->
+
+  <!-- STEP 1 -->
+  <rect x="100" y="74" width="700" height="68" rx="10" fill="rgba(0,60,140,0.4)" stroke="rgba(0,170,255,0.4)" stroke-width="1.5"/>
+  <circle cx="136" cy="108" r="18" fill="#003D9C"/>
+  <text x="136" y="113" text-anchor="middle" font-size="14" font-weight="700" fill="white">1</text>
+  <text x="170" y="100" font-size="13" font-weight="700" fill="#8ecfff">Login to Infosys CIS Cloud Shield</text>
+  <text x="170" y="118" font-size="10" fill="rgba(255,255,255,0.6)">Navigate to Streamlit Cloud URL · Enter username: admin · Password: Infosys@123 · Click Sign In</text>
+  <text x="170" y="132" font-size="10" fill="rgba(255,255,255,0.45)">Session persists until browser tab is closed</text>
+
+  <line x1="450" y1="142" x2="450" y2="160" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 2 -->
+  <rect x="100" y="162" width="700" height="68" rx="10" fill="rgba(0,60,140,0.35)" stroke="rgba(0,170,255,0.3)" stroke-width="1.5"/>
+  <circle cx="136" cy="196" r="18" fill="#003D9C"/>
+  <text x="136" y="201" text-anchor="middle" font-size="14" font-weight="700" fill="white">2</text>
+  <text x="170" y="188" font-size="13" font-weight="700" fill="#8ecfff">Configure OpenAI in Sidebar</text>
+  <text x="170" y="206" font-size="10" fill="rgba(255,255,255,0.6)">Sidebar → OpenAI section · Paste sk-... API key (or pre-loaded from Streamlit secrets)</text>
+  <text x="170" y="220" font-size="10" fill="rgba(255,255,255,0.45)">Select model: gpt-4o (recommended) · gpt-4o-mini (faster) · gpt-4-turbo</text>
+
+  <line x1="450" y1="230" x2="450" y2="248" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 3 -->
+  <rect x="100" y="250" width="700" height="68" rx="10" fill="rgba(0,60,140,0.35)" stroke="rgba(0,170,255,0.3)" stroke-width="1.5"/>
+  <circle cx="136" cy="284" r="18" fill="#003D9C"/>
+  <text x="136" y="289" text-anchor="middle" font-size="14" font-weight="700" fill="white">3</text>
+  <text x="170" y="276" font-size="13" font-weight="700" fill="#8ecfff">Connect ServiceNow</text>
+  <text x="170" y="294" font-size="10" fill="rgba(255,255,255,0.6)">Sidebar → ServiceNow · URL: dev218436.service-now.com · User: admin · Click Test SNOW Connection</text>
+  <text x="170" y="308" font-size="10" fill="rgba(255,255,255,0.45)">Green banner confirms API reachable · 10 real engineer profiles pre-created</text>
+
+  <line x1="450" y1="318" x2="450" y2="336" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 4 -->
+  <rect x="100" y="338" width="700" height="80" rx="10" fill="rgba(0,80,30,0.35)" stroke="rgba(0,200,150,0.4)" stroke-width="1.5"/>
+  <circle cx="136" cy="378" r="18" fill="#006030"/>
+  <text x="136" y="383" text-anchor="middle" font-size="14" font-weight="700" fill="white">4</text>
+  <text x="170" y="364" font-size="13" font-weight="700" fill="#6ee7b7">Connect AWS via IAM Role (AssumeRole)</text>
+  <text x="170" y="382" font-size="10" fill="rgba(255,255,255,0.6)">Select Auth Method: IAM Role · Paste ARN: arn:aws:iam::448549863273:role/CISCloudShieldRole</text>
+  <text x="170" y="396" font-size="10" fill="rgba(255,255,255,0.6)">Bootstrap credentials auto-loaded from secrets · Select Region · Click Connect to AWS</text>
+  <text x="170" y="410" font-size="10" fill="rgba(255,255,255,0.45)">Green: Connected Account 448549863273 · Role assumed · 1-hour temp credentials active</text>
+
+  <line x1="450" y1="418" x2="450" y2="436" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 5 -->
+  <rect x="100" y="438" width="700" height="80" rx="10" fill="rgba(60,20,120,0.35)" stroke="rgba(124,58,237,0.4)" stroke-width="1.5"/>
+  <circle cx="136" cy="478" r="18" fill="#5b21b6"/>
+  <text x="136" y="483" text-anchor="middle" font-size="14" font-weight="700" fill="white">5</text>
+  <text x="170" y="460" font-size="13" font-weight="700" fill="#c4b5fd">Tab 1: Run Credential Intelligence</text>
+  <text x="170" y="478" font-size="10" fill="rgba(255,255,255,0.6)">Open 🔐 Credential Intelligence · Review KPI cards (CRITICAL/HIGH/MEDIUM counts)</text>
+  <text x="170" y="494" font-size="10" fill="rgba(255,255,255,0.6)">Filter findings by severity/environment · Click Launch AI Security Analysis</text>
+  <text x="170" y="508" font-size="10" fill="rgba(255,255,255,0.45)">4 agents stream output: Scanner → Risk → Remediator → Prevention (live token-by-token)</text>
+
+  <line x1="450" y1="518" x2="450" y2="536" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 6 -->
+  <rect x="100" y="538" width="700" height="68" rx="10" fill="rgba(60,20,120,0.3)" stroke="rgba(124,58,237,0.3)" stroke-width="1.5"/>
+  <circle cx="136" cy="572" r="18" fill="#5b21b6"/>
+  <text x="136" y="577" text-anchor="middle" font-size="14" font-weight="700" fill="white">6</text>
+  <text x="170" y="560" font-size="13" font-weight="700" fill="#c4b5fd">Raise ServiceNow Change Requests</text>
+  <text x="170" y="578" font-size="10" fill="rgba(255,255,255,0.6)">Set slider (1-10 max CHGs) · Click Create SNOW Change Requests (Critical Findings)</text>
+  <text x="170" y="592" font-size="10" fill="rgba(255,255,255,0.45)">CHG auto-assigned to commit author (e.g. jane.smith) · Results table shows CHG number + SNOW link</text>
+
+  <line x1="450" y1="606" x2="450" y2="624" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 7 -->
+  <rect x="100" y="626" width="700" height="68" rx="10" fill="rgba(80,50,0,0.35)" stroke="rgba(245,166,35,0.4)" stroke-width="1.5"/>
+  <circle cx="136" cy="660" r="18" fill="#92400e"/>
+  <text x="136" y="665" text-anchor="middle" font-size="14" font-weight="700" fill="white">7</text>
+  <text x="170" y="648" font-size="13" font-weight="700" fill="#f5a623">Tab 2: Assess Backup Coverage</text>
+  <text x="170" y="666" font-size="10" fill="rgba(255,255,255,0.6)">Open 💾 Backup Intelligence · Review donut chart and KPI tiles (Protected/Partial/Unprotected)</text>
+  <text x="170" y="680" font-size="10" fill="rgba(255,255,255,0.45)">Click Scan AWS Backup Coverage for live data · Create SNOW Incidents for unprotected apps</text>
+
+  <line x1="450" y1="694" x2="450" y2="712" stroke="#00aaff" stroke-width="2" marker-end="url(#af)"/>
+
+  <!-- STEP 8 -->
+  <rect x="100" y="714" width="700" height="80" rx="10" fill="rgba(0,80,50,0.35)" stroke="rgba(0,200,150,0.4)" stroke-width="1.5"/>
+  <circle cx="136" cy="754" r="18" fill="#065f46"/>
+  <text x="136" y="759" text-anchor="middle" font-size="14" font-weight="700" fill="white">8</text>
+  <text x="170" y="736" font-size="13" font-weight="700" fill="#6ee7b7">Tab 3: Run Auto-Remediation Loop</text>
+  <text x="170" y="754" font-size="10" fill="rgba(255,255,255,0.6)">Open 🔄 Auto-Remediation Loop · Set source (Mock/Live), count (1-3 for demo), severity (CRITICAL)</text>
+  <text x="170" y="770" font-size="10" fill="rgba(255,255,255,0.6)">Click ▶ Start Remediation Loop · Watch INC→Dispatcher→Remediator→Close stream in real time</text>
+  <text x="170" y="784" font-size="10" fill="rgba(255,255,255,0.45)">INC created → CHG raised → remediated → INC closed in ServiceNow automatically</text>
+
+  <line x1="450" y1="794" x2="450" y2="812" stroke="#afg" stroke-width="2" marker-end="url(#afg)"/>
+
+  <!-- STEP 9 -->
+  <rect x="100" y="814" width="700" height="68" rx="10" fill="rgba(0,80,50,0.3)" stroke="rgba(0,200,150,0.3)" stroke-width="1.5"/>
+  <circle cx="136" cy="848" r="18" fill="#065f46"/>
+  <text x="136" y="853" text-anchor="middle" font-size="14" font-weight="700" fill="white">9</text>
+  <text x="170" y="836" font-size="13" font-weight="700" fill="#6ee7b7">Review Summary &amp; ServiceNow Tickets</text>
+  <text x="170" y="854" font-size="10" fill="rgba(255,255,255,0.6)">Loop Summary table: INC numbers, SNOW links, assigned engineers, status (✅ Resolved)</text>
+  <text x="170" y="868" font-size="10" fill="rgba(255,255,255,0.45)">Click SNOW links to open tickets in ServiceNow · Confirm INC state = Closed</text>
+
+  <line x1="450" y1="882" x2="450" y2="900" stroke="#00c896" stroke-width="2" marker-end="url(#afg)"/>
+
+  <!-- STEP 10 — OUTCOME -->
+  <rect x="60" y="902" width="780" height="84" rx="12" fill="rgba(0,61,156,0.3)" stroke="#00aaff" stroke-width="2"/>
+  <text x="450" y="928" text-anchor="middle" font-size="14" font-weight="700" fill="#00aaff">✅ Outcome Achieved</text>
+  <text x="450" y="950" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)">Credentials scanned · AI analysis complete · CHGs raised and assigned · Backup gaps identified</text>
+  <text x="450" y="966" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.7)">Auto-remediation loop executed · ServiceNow incidents created, progressed, and closed</text>
+  <text x="450" y="982" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.5)">Full audit trail in CloudTrail · SNOW tickets with real user assignment · Live AWS data if connected</text>
+
+  <!-- Footer -->
+  <rect x="0" y="1058" width="900" height="22" fill="rgba(0,61,156,0.4)"/>
+  <text x="450" y="1073" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">Infosys Limited · CIS Cloud Shield · End User Flow · Confidential · v1.0 · 2026</text>
+</svg>

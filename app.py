@@ -858,15 +858,19 @@ with tab1:
                     description=desc,
                     change_type="Emergency" if row["severity"] == "CRITICAL" else "Normal",
                     risk="High" if row["severity"] == "CRITICAL" else "Moderate",
+                    commit_author=row.get("commit_author", ""),
+                    severity=row.get("severity", ""),
                 )
                 if res["ok"]:
                     st.session_state.cred_tickets[row["id"]] = res
                     cr_rows.append({"Finding": row["id"], "App": row["application"],
                                     "Type": row["credential_type"], "CHG": res["number"],
+                                    "Assigned To": res.get("assigned_to", "—"),
                                     "URL": res["url"], "Status": "✅ Created"})
                 else:
                     cr_rows.append({"Finding": row["id"], "App": row["application"],
                                     "Type": row["credential_type"], "CHG": "-",
+                                    "Assigned To": "—",
                                     "URL": "-", "Status": f"❌ {res.get('error', 'Failed')}"})
                 cr_pb.progress((idx + 1) / len(critical_open))
 
@@ -1156,16 +1160,20 @@ with tab2:
                     description=desc,
                     urgency=urg,
                     impact=imp,
+                    commit_author=getattr(app, "team", "").lower().replace(" ", "."),
+                    severity="CRITICAL" if urg == 1 else "HIGH",
                 )
 
                 if result["ok"]:
                     st.session_state.snow_tickets[app.app_id] = result
                     rows.append({"Application": app.application, "Criticality": app.criticality,
                                  "Gap": app.backup_status, "Ticket": result["number"],
+                                 "Assigned To": result.get("assigned_to", "—"),
                                  "URL": result["url"], "Status": "✅ Created"})
                 else:
                     rows.append({"Application": app.application, "Criticality": app.criticality,
                                  "Gap": app.backup_status, "Ticket": "—",
+                                 "Assigned To": "—",
                                  "URL": "—", "Status": f"❌ {result.get('error', 'Failed')}"})
 
                 pb.progress((idx + 1) / len(to_t))
