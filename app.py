@@ -602,14 +602,23 @@ with st.sidebar:
 
     st.divider()
     st.markdown("### 📊 Environment")
-    crit  = len(findings_df[findings_df.severity == "CRITICAL"])
-    high  = len(findings_df[findings_df.severity == "HIGH"])
-    unp   = len(apps_df[apps_df.backup_status == "Unprotected"])
-    part  = len(apps_df[apps_df.backup_status == "Partial"])
+    _sidebar_iam = st.session_state.get("live_iam")
+    if _sidebar_iam:
+        _sb_df = pd.DataFrame(_sidebar_iam)
+        crit   = int((_sb_df.severity == "CRITICAL").sum())
+        high   = int((_sb_df.severity == "HIGH").sum())
+        _total = len(_sb_df)
+        _label = f"{_total} (Live)"
+    else:
+        crit   = len(findings_df[findings_df.severity == "CRITICAL"])
+        high   = len(findings_df[findings_df.severity == "HIGH"])
+        _label = "1,200 (Mock)"
+    unp  = len(apps_df[apps_df.backup_status == "Unprotected"])
+    part = len(apps_df[apps_df.backup_status == "Partial"])
     c1, c2 = st.columns(2)
-    c1.metric("Findings", "1,200");   c2.metric("Apps",     "250")
-    c1.metric("Critical", crit);      c2.metric("High",     high)
-    c1.metric("No Backup", unp);      c2.metric("Partial",  part)
+    c1.metric("Findings", _label);  c2.metric("Apps", "250")
+    c1.metric("Critical", crit);    c2.metric("High", high)
+    c1.metric("No Backup", unp);    c2.metric("Partial", part)
     st.divider()
     st.caption("v1.0 · Prototype · 2026")
 
@@ -1000,11 +1009,13 @@ with tab1:
     st.divider()
 
     # ── Charts ────────────────────────────────────────────────────────────────
-    st.subheader("📊 Mock Data Analytics (1,200 simulated findings)")
+    _chart_label = "🟢 Live AWS Data Analytics" if _has_live else "📊 Mock Data Analytics (1,200 simulated findings)"
+    st.subheader(_chart_label)
+    _chart_df = _active_df  # uses live data when connected, mock otherwise
     ch1, ch2, ch3 = st.columns(3)
 
     with ch1:
-        sev_c = findings_df.severity.value_counts().reset_index()
+        sev_c = _chart_df.severity.value_counts().reset_index()
         sev_c.columns = ["Severity", "Count"]
         fig = px.pie(sev_c, values="Count", names="Severity", title="Findings by Severity",
                      color="Severity",
@@ -1014,39 +1025,42 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
 
     with ch2:
-        tc = findings_df.credential_type.value_counts().head(7).reset_index()
-        tc.columns = ["Type", "Count"]
-        fig = px.bar(tc, x="Count", y="Type", orientation="h",
-                     title="Top Credential Types", color="Count",
-                     color_continuous_scale="reds")
-        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                          yaxis={"categoryorder": "total ascending"})
-        st.plotly_chart(fig, use_container_width=True)
+        if "credential_type" in _chart_df.columns:
+            tc = _chart_df.credential_type.value_counts().head(7).reset_index()
+            tc.columns = ["Type", "Count"]
+            fig = px.bar(tc, x="Count", y="Type", orientation="h",
+                         title="Top Credential Types", color="Count",
+                         color_continuous_scale="reds")
+            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                              yaxis={"categoryorder": "total ascending"})
+            st.plotly_chart(fig, use_container_width=True)
 
     with ch3:
-        ac2 = findings_df.groupby("application").size().sort_values(ascending=False).head(8).reset_index()
-        ac2.columns = ["Application", "Findings"]
-        fig = px.bar(ac2, x="Findings", y="Application", orientation="h",
-                     title="Most Exposed Applications",
-                     color="Findings", color_continuous_scale="oranges")
-        fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                          yaxis={"categoryorder": "total ascending"})
-        st.plotly_chart(fig, use_container_width=True)
+        if "application" in _chart_df.columns:
+            ac2 = _chart_df.groupby("application").size().sort_values(ascending=False).head(8).reset_index()
+            ac2.columns = ["Application", "Findings"]
+            fig = px.bar(ac2, x="Findings", y="Application", orientation="h",
+                         title="Most Exposed Applications",
+                         color="Findings", color_continuous_scale="oranges")
+            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                              yaxis={"categoryorder": "total ascending"})
+            st.plotly_chart(fig, use_container_width=True)
 
     # ── Env heatmap ────────────────────────────────────────────────────────────
-    heat = findings_df.groupby(["environment", "severity"]).size().reset_index(name="Count")
-    heat_pivot = heat.pivot(index="environment", columns="severity", values="Count").fillna(0)
-    fig = go.Figure(go.Heatmap(
-        z=heat_pivot.values,
-        x=heat_pivot.columns.tolist(),
-        y=heat_pivot.index.tolist(),
-        colorscale="Reds",
-        text=heat_pivot.values.astype(int),
-        texttemplate="%{text}",
-    ))
-    fig.update_layout(title="Findings Heatmap: Environment × Severity",
-                      paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-    st.plotly_chart(fig, use_container_width=True)
+    if "environment" in _chart_df.columns and "severity" in _chart_df.columns:
+        heat = _chart_df.groupby(["environment", "severity"]).size().reset_index(name="Count")
+        heat_pivot = heat.pivot(index="environment", columns="severity", values="Count").fillna(0)
+        fig = go.Figure(go.Heatmap(
+            z=heat_pivot.values,
+            x=heat_pivot.columns.tolist(),
+            y=heat_pivot.index.tolist(),
+            colorscale="Reds",
+            text=heat_pivot.values.astype(int),
+            texttemplate="%{text}",
+        ))
+        fig.update_layout(title="Findings Heatmap: Environment × Severity",
+                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        st.plotly_chart(fig, use_container_width=True)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
